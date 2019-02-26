@@ -1,3 +1,7 @@
 [submodule "qemu-gui"]
 	path = qemu-gui
 	url = https://github.com/ispras/qemu-gui
+[submodule "qemu"]
+	path = qemu
+	url = https://github.com/ispras/qemu
+	branch = swat
