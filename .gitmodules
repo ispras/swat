@@ -1,0 +1,3 @@
+[submodule "qemu-gui"]
+	path = qemu-gui
+	url = https://github.com/ispras/qemu-gui
