@@ -5,3 +5,7 @@
 	path = qemu
 	url = https://github.com/ispras/qemu
 	branch = swat
+[submodule "binutils-gdb"]
+	path = binutils-gdb
+	url = https://github.com/ispras/binutils-gdb
+	branch = reverse-roll
