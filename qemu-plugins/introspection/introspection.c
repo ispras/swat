@@ -1,6 +1,7 @@
-#include <stdint.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "plugins.h"
+#include "introspection.h"
 #include "regnum.h"
 
 bool plugin_init(const char *args)
@@ -37,8 +38,8 @@ void plugin_before_insn(uint64_t pc, void *cpu)
     qemulib_read_register(cpu, (uint8_t*)&reg, I386_EAX_REGNUM);
     /* log system calls */
     if (code == 0x34) {
-        qemulib_log("sysenter %x\n", reg);
+        qemulib_log("%llx: sysenter %x\n", vmi_get_context(cpu), reg);
     } else if (code == 0x35) {
-        qemulib_log("sysexit %x\n", reg);
+        qemulib_log("%llx: sysexit %x\n", vmi_get_context(cpu), reg);
     }
 }
