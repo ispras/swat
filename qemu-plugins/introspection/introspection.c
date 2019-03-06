@@ -5,6 +5,7 @@
 
 bool plugin_init(const char *args)
 {
+    process_init();
     syscall_init();
 
     return true;

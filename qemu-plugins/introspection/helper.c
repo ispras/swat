@@ -36,8 +36,9 @@ char *vmi_strdup(cpu_t cpu, address_t addr, address_t maxlen)
         qemulib_read_memory(cpu, addr + len, &c, 1);
         ++len;
     } while (c && (!maxlen || len < maxlen));
-    char *str = g_malloc(len);
+    char *str = g_malloc(len + 1);
     qemulib_read_memory(cpu, addr, str, len);
+    str[len] = 0;
     return str;
 }
 
@@ -53,13 +54,13 @@ wchar_t *vmi_strdupw(cpu_t cpu, address_t addr, address_t maxlen)
         qemulib_read_memory(cpu, addr + len * 2, (uint8_t*)&c, 2);
         ++len;
     } while (c && (!maxlen || len < maxlen));
-    wchar_t *str = g_malloc(len * sizeof(wchar_t));
+    wchar_t *str = g_malloc((len + 1) * sizeof(wchar_t));
     len = 0;
     do {
         qemulib_read_memory(cpu, addr + len * 2, (uint8_t*)&c, 2);
         str[len] = c;
         ++len;
     } while (c && (!maxlen || len < maxlen));
+    str[len] = 0;
     return str;
 }
-
