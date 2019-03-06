@@ -42,7 +42,7 @@ char *vmi_strdup(cpu_t cpu, address_t addr, address_t maxlen)
     return str;
 }
 
-wchar_t *vmi_strdupw(cpu_t cpu, address_t addr, address_t maxlen)
+char *vmi_strdupw(cpu_t cpu, address_t addr, address_t maxlen)
 {
     if (!addr) {
         return NULL;
@@ -50,25 +50,20 @@ wchar_t *vmi_strdupw(cpu_t cpu, address_t addr, address_t maxlen)
     // TODO: swap bytes
     uint16_t c;
     uint64_t len = 0;
+    uint64_t bytes = 0;
     do {
         qemulib_read_memory(cpu, addr + len * 2, (uint8_t*)&c, 2);
         ++len;
+        bytes += g_unichar_to_utf8(c, NULL);
     } while (c && (!maxlen || len < maxlen));
-    wchar_t *str = g_malloc((len + 1) * sizeof(wchar_t));
+    char *str = g_malloc(bytes + 1);
     len = 0;
+    bytes = 0;
     do {
         qemulib_read_memory(cpu, addr + len * 2, (uint8_t*)&c, 2);
-        str[len] = c;
+        bytes += g_unichar_to_utf8(c, str + bytes);
         ++len;
     } while (c && (!maxlen || len < maxlen));
-    str[len] = 0;
+    str[bytes] = 0;
     return str;
-}
-
-wchar_t *strdupw(wchar_t *s)
-{
-    size_t len = wcslen(s);
-    wchar_t *r = g_malloc((len + 1) * sizeof(wchar_t));
-    wmemcpy(r, s, len + 1);
-    return r;
 }

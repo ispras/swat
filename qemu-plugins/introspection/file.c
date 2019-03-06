@@ -24,7 +24,7 @@ void file_deinit_process(Process *p)
     p->files = NULL;
 }
 
-void file_open(context_t ctx, wchar_t *name, handle_t handle)
+void file_open(context_t ctx, char *name, handle_t handle)
 {
     Process *p = process_get(ctx);
     handle_t *key = g_new(handle_t, 1);

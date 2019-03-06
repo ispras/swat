@@ -5,7 +5,7 @@
 
 typedef struct FileParams {
     address_t phandle;
-    wchar_t *name;
+    char *name;
 } FileParams;
 
 typedef struct DuplicateParams {
@@ -45,7 +45,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         address_t name = vmi_read_dword(cpu, attributes + 8);
         uint16_t len = vmi_read_word(cpu, name);
         address_t buf = vmi_read_dword(cpu, name + 4);
-        wchar_t *str = vmi_strdupw(cpu, buf, len);
+        char *str = vmi_strdupw(cpu, buf, len);
         FileParams *p = g_new(FileParams, 1);
         p->phandle = phandle;
         p->name = str;
@@ -104,7 +104,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         uint16_t len = vmi_read_word(cpu, name);
         address_t buf = vmi_read_dword(cpu, name + 4);
 
-        wchar_t *str = vmi_strdupw(cpu, buf, len);
+        char *str = vmi_strdupw(cpu, buf, len);
         FileParams *p = g_new(FileParams, 1);
         p->phandle = phandle;
         p->name = str;
@@ -157,7 +157,7 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
             handle_t handle = vmi_read_dword(cpu, p->phandle);
             qemulib_log("duplicate %x = %x = %ls\n",
                 (int)handle, (int)p->f->handle, p->f->filename);
-            file_open(vmi_get_context(cpu), strdupw(p->f->filename), handle);
+            file_open(vmi_get_context(cpu), g_strdup(p->f->filename), handle);
         }
         break;
     }
@@ -169,7 +169,7 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         FileParams *p = sc->params;
         if (!retval) {
             handle_t handle = vmi_read_dword(cpu, p->phandle);
-            qemulib_log("open file: %x = %ls\n", (int)handle, p->name);
+            qemulib_log("open file: %x = %s\n", (int)handle, p->name);
             file_open(vmi_get_context(cpu), p->name, handle);
             /* Don't free p->name */
         } else {
