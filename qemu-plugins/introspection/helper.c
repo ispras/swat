@@ -64,3 +64,11 @@ wchar_t *vmi_strdupw(cpu_t cpu, address_t addr, address_t maxlen)
     str[len] = 0;
     return str;
 }
+
+wchar_t *strdupw(wchar_t *s)
+{
+    size_t len = wcslen(s);
+    wchar_t *r = g_malloc((len + 1) * sizeof(wchar_t));
+    wmemcpy(r, s, len + 1);
+    return r;
+}

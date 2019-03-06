@@ -7,6 +7,7 @@ static void process_destroy(gpointer data)
 {
     Process *p = data;
     file_deinit_process(p);
+    syscall_deinit_process(p);
     g_free(p);
 }
 
@@ -14,6 +15,7 @@ static Process *process_create(context_t ctx)
 {
     Process *p = g_new0(Process, 1);
     p->context = ctx;
+    syscall_init_process(p);
     file_init_process(p);
 
     context_t *key = g_new(context_t, 1);

@@ -40,3 +40,8 @@ void file_close(context_t ctx, handle_t handle)
     Process *p = process_get(ctx);
     g_hash_table_remove(p->files, &handle);
 }
+
+File *file_find(context_t ctx, handle_t handle)
+{
+    return g_hash_table_lookup(process_get(ctx)->files, &handle);
+}
