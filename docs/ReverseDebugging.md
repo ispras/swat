@@ -87,6 +87,7 @@ After executing the command, the simulator will be launched in the mode, waiting
 
 ![Qemu into standby mode](./imgs/replay.png)
 
+
 After that, the debugger should be running and connect to the simulator:   
 `gdb -ex 'target remote :1234'`   
 
