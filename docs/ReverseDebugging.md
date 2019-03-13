@@ -3,7 +3,7 @@
 Reverse debugging allows "executing" the program in reverse direction.
 GDB remote protocol supports "reverse step", "reverse continue" and "reverse-roll"
 commands. The first one steps single instruction backwards in time,
-and the second one finds the last breakpoint in the past. Reverse-roll command allows steps several instructions backwards in time.
+and the second one finds the last breakpoint in the past. Reverse-roll command allows stepping several instructions backwards in time.
 
 Recorded executions may be used to enable reverse debugging. QEMU can't
 execute the code in backwards direction, but can load a snapshot and
