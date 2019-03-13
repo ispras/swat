@@ -85,12 +85,13 @@ Start simulator and gdb server for interaction with GDB:
 
 After executing the command, the simulator will be launched in the mode, waiting for the debugger connection.
 
-![Qemu into standby mode](/imgs/replay.png)
+![Qemu into standby mode](./imgs/replay.png)
+
 
 After that, the debugger should be running and connect to the simulator:   
 `gdb -ex 'target remote :1234'`   
 
-![Remote connection of debugger](/imgs/debugger_remote_connection.png)
+![Remote connection of debugger](./imgs/debugger_remote_connection.png)
 
 Breakpoint to address or to func name (if you have symbolic information) can be set now. For example the address in which the undesirable behavior appears equal 0x000000007fe61fe9. Set breakpoint and go forward:   
 `b *(void*)0x7fe61fe9`  
