@@ -4,7 +4,7 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(GLIB REQUIRED glib-2.0)
 
 add_library(introspection SHARED introspection.c
-            context.c file.c helper.c process.c
+            context.c file.c helper.c process.c section.c
             syscalls.c syscall-i386.c)
 
 target_include_directories(introspection PRIVATE ../../qemu/plugins/include)

@@ -14,10 +14,17 @@ typedef struct DuplicateParams {
     // TODO: process handle
 } DuplicateParams;
 
+typedef struct SectionParams {
+    address_t phandle;
+    char *name;
+    File *file;
+} SectionParams;
+
 static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
 {
     void *params = NULL;
     address_t data = vmi_get_register(cpu, I386_EDX_REGNUM) + 8;
+    context_t ctx = vmi_get_context(cpu);
     switch (sc)
     {
     case 0x19: // NtClose
@@ -51,6 +58,92 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         p->name = str;
         return p;
     }
+    case 0x2f: // NtCreateProcess
+        // OUT PHANDLE           ProcessHandle,
+        // IN ACCESS_MASK        DesiredAccess,
+        // IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
+        // IN HANDLE             ParentProcess,
+        // IN BOOLEAN            InheritObjectTable,
+        // IN HANDLE             SectionHandle OPTIONAL,
+        // IN HANDLE             DebugPort OPTIONAL,
+        // IN HANDLE             ExceptionPort OPTIONAL );
+        /* Fallthrough */
+    case 0x30: // NtCreateProcessEx
+    {
+        // OUT PHANDLE ProcessHandle,
+        // IN ACCESS_MASK DesiredAccess,
+        // IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
+        // IN HANDLE ParentProcess,
+        // IN ULONG Flags,
+        // IN HANDLE SectionHandle OPTIONAL,
+        // IN HANDLE DebugPort OPTIONAL,
+        // IN HANDLE ExceptionPort OPTIONAL,
+        // IN BOOLEAN InJob)
+        break;
+    }
+    case 0x32: // NtCreateSection
+    {
+        // PHANDLE            SectionHandle,
+        // ACCESS_MASK        DesiredAccess,
+        // POBJECT_ATTRIBUTES ObjectAttributes,
+        // PLARGE_INTEGER     MaximumSize,
+        // ULONG              SectionPageProtection,
+        // ULONG              AllocationAttributes,
+        // HANDLE             FileHandle
+        address_t attributes = vmi_read_dword(cpu, data + 8);
+        address_t name = vmi_read_dword(cpu, attributes + 8);
+        uint16_t len = vmi_read_word(cpu, name);
+        address_t buf = vmi_read_dword(cpu, name + 4);
+        char *str = vmi_strdupw(cpu, buf, len);
+
+        address_t hfile = vmi_read_dword(cpu, data + 24);
+        File *file = file_find(ctx, hfile);
+        if (file) {
+            SectionParams *p = g_new(SectionParams, 1);
+            p->phandle = vmi_read_dword(cpu, data);
+            p->name = str ? g_utf8_strup(str, -1) : NULL;
+            g_free(str);
+            p->file = file;
+            return p;
+        }
+        break;
+    }
+    // TODO: NtCreateSectionEx
+    case 0x7d: // NtOpenSection
+    {
+        // PHANDLE            SectionHandle,
+        // ACCESS_MASK        DesiredAccess,
+        // POBJECT_ATTRIBUTES ObjectAttributes
+        address_t attributes = vmi_read_dword(cpu, data + 8);
+        address_t name = vmi_read_dword(cpu, attributes + 8);
+        uint16_t len = vmi_read_word(cpu, name);
+        address_t buf = vmi_read_dword(cpu, name + 4);
+
+        SectionParams *p = g_new0(SectionParams, 1);
+        p->phandle = vmi_read_dword(cpu, data);
+        char *str = vmi_strdupw(cpu, buf, len);
+        p->name = g_utf8_strup(str, -1);
+        g_free(str);
+        return p;
+    }
+    case 0x6c: // NtMapViewOfSection
+    {
+        // HANDLE          SectionHandle,
+        // HANDLE          ProcessHandle,
+        // PVOID           *BaseAddress,
+        // ULONG_PTR       ZeroBits,
+        // SIZE_T          CommitSize,
+        // PLARGE_INTEGER  SectionOffset,
+        // PSIZE_T         ViewSize,
+        // SECTION_INHERIT InheritDisposition,
+        // ULONG           AllocationType,
+        // ULONG           Win32Protect        
+
+        //uint32_t p = vmi_read_dword(cpu, data + 4);
+        //qemulib_log("map view %x\n", p);
+        break;
+    }
+//#define VMI_SYS_UNMAP_VIEW_OF_SECTION   0x010b
     case 0x44: // NtDuplicateObject
     {
         // TODO: can't identify the process by handle
@@ -62,6 +155,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
             address_t phandle = vmi_read_dword(cpu, data + 4);
             handle_t handle = vmi_read_dword(cpu, phandle);
             address_t out = vmi_read_dword(cpu, data + 12);
+            // TODO: find other handles
             File *f = file_find(vmi_get_context(cpu), handle);
             if (f) {
                 DuplicateParams *p = g_new(DuplicateParams, 1);
@@ -139,6 +233,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
 static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
 {
     uint32_t retval = vmi_get_register(cpu, I386_EAX_REGNUM);
+    context_t ctx = vmi_get_context(cpu);
     switch (sc->num)
     {
     case 0x19: // NtClose
@@ -147,6 +242,20 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
             handle_t *h = sc->params;
             qemulib_log("close handle: %x\n", (int)*h);
             file_close(vmi_get_context(cpu), *h);
+            section_close(vmi_get_context(cpu), *h);
+        }
+        break;
+    }
+    case 0x32: // NtCreateSection
+    {
+        SectionParams *p = sc->params;
+        if (!retval) {
+            handle_t handle = vmi_read_dword(cpu, p->phandle);
+            section_create(ctx, p->name, handle, p->file);
+            qemulib_log("create section %s file:%s\n",
+                p->name, p->file->filename);
+        } else {
+            g_free(p->name);
         }
         break;
     }
@@ -172,6 +281,24 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
             qemulib_log("open file: %x = %s\n", (int)handle, p->name);
             file_open(vmi_get_context(cpu), p->name, handle);
             /* Don't free p->name */
+        } else {
+            g_free(p->name);
+        }
+        break;
+    }
+    case 0x7d: // NtOpenSection
+    {
+        SectionParams *p = sc->params;
+        if (!retval) {
+            qemulib_log("opening section %s\n", p->name);
+            handle_t handle = vmi_read_dword(cpu, p->phandle);
+            Section *s = section_open(ctx, p->name, handle);
+            if (s) {
+                qemulib_log("open section %s file:%s\n",
+                    p->name, s->filename);
+            } else {
+                qemulib_log("Internal error: no open section %s\n", p->name);
+            }
         } else {
             g_free(p->name);
         }

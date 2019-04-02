@@ -12,10 +12,10 @@ typedef uint64_t context_t;
 typedef uint64_t handle_t;
 typedef uint64_t guest_pid_t;
 
-typedef enum HandleType {
-    H_FILE,
+/*typedef enum HandleType {
+    H_SECTION,
     H_PROCESS,
-} HandleType;
+} HandleType;*/
 
 typedef struct Process {
     context_t context;
@@ -25,6 +25,10 @@ typedef struct Process {
     GHashTable *files;
     /* List of the executing system calls */
     GHashTable *syscalls;
+    
+    /* Platform-specific handles */
+    /* List of the open sections */
+    GHashTable *sectionHandles;
 } Process;
 
 typedef struct File {
@@ -32,11 +36,16 @@ typedef struct File {
     char *filename;
 } File;
 
-typedef struct Handle {
+typedef struct Section {
+    char *name;
+    char *filename;
+} Section;
+
+/*typedef struct Handle {
     HandleType type;
     handle_t value;
     void *opaque;
-} Handle;
+} Handle;*/
 
 /* Guest data extraction helpers */
 uint64_t vmi_get_register(cpu_t cpu, int reg);
@@ -66,5 +75,14 @@ File *file_find(context_t ctx, handle_t handle);
 /* Process information and monitoring */
 void process_init(void);
 Process *process_get(context_t ctx);
+
+/* Windows: section monitoring */
+void section_init(void);
+void section_init_process(Process *p);
+void section_deinit_process(Process *p);
+void section_create(context_t ctx, char *name, handle_t handle, File *file);
+Section *section_open(context_t ctx, char *name, handle_t handle);
+void section_close(context_t ctx, handle_t handle);
+Section *section_find(context_t ctx, handle_t handle);
 
 #endif // INTROSPECTION_H

@@ -5,6 +5,7 @@
 bool plugin_init(const char *args)
 {
     process_init();
+    section_init();
 
     return true;
 }
