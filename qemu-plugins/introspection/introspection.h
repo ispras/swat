@@ -25,6 +25,8 @@ typedef struct Process {
     GHashTable *files;
     /* List of the executing system calls */
     GHashTable *syscalls;
+    /* List of the file mappings */
+    GTree *mappings;
     
     /* Platform-specific handles */
     /* List of the open sections */
@@ -40,6 +42,12 @@ typedef struct Section {
     char *name;
     char *filename;
 } Section;
+
+typedef struct Mapping {
+    char *filename;
+    address_t base;
+    address_t size;
+} Mapping;
 
 /*typedef struct Handle {
     HandleType type;
@@ -84,5 +92,12 @@ void section_create(context_t ctx, char *name, handle_t handle, File *file);
 Section *section_open(context_t ctx, char *name, handle_t handle);
 void section_close(context_t ctx, handle_t handle);
 Section *section_find(context_t ctx, handle_t handle);
+
+/* File mappings */
+void mapping_init_process(Process *p);
+void mapping_deinit_process(Process *p);
+void mapping_create(context_t ctx, const char *filename,
+                    address_t base, address_t size);
+void mapping_delete(context_t ctx, address_t addr);
 
 #endif // INTROSPECTION_H

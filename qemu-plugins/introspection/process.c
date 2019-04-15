@@ -9,6 +9,7 @@ static void process_destroy(gpointer data)
     section_deinit_process(p);
     file_deinit_process(p);
     syscall_deinit_process(p);
+    mapping_deinit_process(p);
     g_free(p);
 }
 
@@ -19,6 +20,7 @@ static Process *process_create(context_t ctx)
     syscall_init_process(p);
     file_init_process(p);
     section_init_process(p);
+    mapping_init_process(p);
 
     context_t *key = g_new(context_t, 1);
     *key = ctx;

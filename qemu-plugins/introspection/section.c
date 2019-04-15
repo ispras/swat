@@ -1,6 +1,10 @@
 #include "introspection.h"
 #include "plugins.h"
 
+/*
+ * Global list of the sections.
+ * They are only created and never destroyed.
+ */
 static GHashTable *sections;
 
 static void section_destroy(gpointer data)
