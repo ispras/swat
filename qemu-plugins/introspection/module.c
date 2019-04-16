@@ -5,6 +5,8 @@
 
 void module_delete(Module *module)
 {
-    g_free(module->opaque);
-    g_free(module);
+    if (module) {
+        g_free(module->opaque);
+        g_free(module);
+    }
 }

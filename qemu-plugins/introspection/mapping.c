@@ -27,7 +27,7 @@ static gint mapping_compare(gconstpointer a, gconstpointer b, gpointer opaque)
 static gint mapping_search(gconstpointer a, gconstpointer b)
 {
     const Mapping *k = a;
-    address_t *addr = b;
+    const address_t *addr = b;
     if (*addr < k->base) {
         return -1;
     } else if (*addr < k->base + k->size) {

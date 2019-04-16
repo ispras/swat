@@ -12,12 +12,16 @@ bool plugin_init(const char *args)
 
 bool plugin_needs_before_insn(uint64_t pc, void *cpu)
 {
-	return syscall_needs_before_insn(pc, cpu);
+	return syscall_needs_before_insn(pc, cpu)
+        || function_needs_before_insn(pc, cpu);
 }
 
 void plugin_before_insn(uint64_t pc, void *cpu)
 {
     if (syscall_needs_before_insn(pc, cpu)) {
         syscall_before_insn(pc, cpu);
+    }
+    if (function_needs_before_insn(pc, cpu)) {
+        function_before_insn(pc, cpu);
     }
 }

@@ -27,6 +27,8 @@ typedef struct Process {
     GHashTable *syscalls;
     /* List of the file mappings */
     GTree *mappings;
+    /* List of the functions */
+    GHashTable *functions;
     
     /* Platform-specific handles */
     /* List of the open sections */
@@ -114,5 +116,12 @@ void mapping_delete(context_t ctx, address_t addr);
 
 /* Modules */
 void module_delete(Module *module);
+
+/* Functions */
+void function_init_process(Process *p);
+void function_deinit_process(Process *p);
+void function_add(context_t ctx, address_t entry);
+bool function_needs_before_insn(address_t pc, cpu_t cpu);
+void function_before_insn(address_t pc, cpu_t cpu);
 
 #endif // INTROSPECTION_H
