@@ -116,6 +116,8 @@ void mapping_delete(context_t ctx, address_t addr);
 
 /* Modules */
 void module_delete(Module *module);
+bool module_needs_before_tb(address_t pc, cpu_t cpu);
+void module_before_tb(address_t pc, cpu_t cpu);
 
 /* Functions */
 void function_init_process(Process *p);
