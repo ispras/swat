@@ -43,11 +43,23 @@ typedef struct Section {
     char *filename;
 } Section;
 
+typedef struct Module Module;
+
 typedef struct Mapping {
     char *filename;
     address_t base;
     address_t size;
+
+    Module *module;
 } Mapping;
+
+/* Executable module */
+typedef struct Module {
+    Mapping *mapping;
+
+    /* Parser-related information */
+    void *opaque;
+} Module;
 
 /*typedef struct Handle {
     HandleType type;
@@ -99,5 +111,8 @@ void mapping_deinit_process(Process *p);
 void mapping_create(context_t ctx, const char *filename,
                     address_t base, address_t size);
 void mapping_delete(context_t ctx, address_t addr);
+
+/* Modules */
+void module_delete(Module *module);
 
 #endif // INTROSPECTION_H

@@ -3,6 +3,13 @@
 #include "plugins.h"
 #include "regnum.h"
 
+#define DEBUG
+#ifdef DEBUG
+#define DPRINTF qemulib_log
+#else
+static inline void DPRINTF(const char *fmt, ...) {}
+#endif
+
 #define HANDLE_MASK (~3U)
 
 typedef struct FileParams {
@@ -114,7 +121,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
             p->file = file;
             return p;
         } else {
-            qemulib_log("section with unknown file %x\n", hfile);
+            DPRINTF("section with unknown file %x\n", hfile);
         }
         break;
     }
@@ -152,11 +159,11 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         uint32_t sect = vmi_read_dword(cpu, data) & HANDLE_MASK;
         uint32_t proc = vmi_read_dword(cpu, data + 4);
         if (proc != 0xffffffff) {
-            qemulib_log("unsupported map view\n");
+            DPRINTF("unsupported map view\n");
         } else {
             Section *s = section_find(vmi_get_context(cpu), sect);
             if (!s) {
-                qemulib_log("%08x: map view of unknown section %x\n",
+                DPRINTF("%08x: map view of unknown section %x\n",
                     ctx, sect);
                 break;
             }
@@ -187,10 +194,10 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
                 p->phandle = out;
                 return p;
             } else {
-                qemulib_log("unsupported duplicate object (unknown type)\n");
+                DPRINTF("unsupported duplicate object (unknown type)\n");
             }
         } else {
-            qemulib_log("unsupported duplicate object (other process)\n");
+            DPRINTF("unsupported duplicate object (other process)\n");
         }
         // IN HANDLE               SourceProcessHandle,
         // IN PHANDLE              SourceHandle,
@@ -244,7 +251,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
             *a = vmi_read_dword(cpu, data + 8);
             return a;
         } else {
-            qemulib_log("unsupported query information for handle %x class %d\n",
+            DPRINTF("unsupported query information for handle %x class %d\n",
                 (int)handle, info);
         }
     }
@@ -260,7 +267,7 @@ static void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
             *base = vmi_read_dword(cpu, data + 4);
             return base;
         } else {
-            qemulib_log("unsupported section unmap for process %x\n",
+            DPRINTF("unsupported section unmap for process %x\n",
                 (int)handle);
         }
         break;
@@ -281,7 +288,7 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
     {
         if (!retval) {
             handle_t *h = sc->params;
-            qemulib_log("%08x: close handle: %x\n", (int)ctx, (int)*h);
+            DPRINTF("%08x: close handle: %x\n", (int)ctx, (int)*h);
             file_close(vmi_get_context(cpu), *h);
             section_close(vmi_get_context(cpu), *h);
         }
@@ -293,7 +300,7 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         if (!retval) {
             handle_t handle = vmi_read_dword(cpu, p->phandle);
             section_create(ctx, p->name, handle, p->file);
-            qemulib_log("%08x: create section %x:%s file:%s\n", (int)ctx,
+            DPRINTF("%08x: create section %x:%s file:%s\n", (int)ctx,
                 (int)handle, p->name, p->file->filename);
         } else {
             g_free(p->name);
@@ -305,7 +312,7 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         DuplicateParams *p = sc->params;
         if (!retval) {
             handle_t handle = vmi_read_dword(cpu, p->phandle);
-            qemulib_log("%08x: duplicate %x = %x = %ls\n", (int)ctx,
+            DPRINTF("%08x: duplicate %x = %x = %ls\n", (int)ctx,
                 (int)handle, (int)p->f->handle, p->f->filename);
             file_open(vmi_get_context(cpu), g_strdup(p->f->filename), handle);
         }
@@ -317,21 +324,21 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         if (!retval) {
             address_t base = vmi_read_dword(cpu, p->pbase);
             address_t size = vmi_read_dword(cpu, p->psize);
-            qemulib_log("%08x: map view %s/%s to %x[%x]\n", (int)ctx,
+            DPRINTF("%08x: map view %s/%s to %x[%x]\n", (int)ctx,
                 p->section->name, p->section->filename, (int)base, (int)size);
             mapping_create(ctx, p->section->filename, base, size);
         }
         break;
     }
     case 0x25: // NtCreateFile
-        qemulib_log("create\n");
+        DPRINTF("create\n");
         /* Fallthrough */
     case 0x74: // NtOpenFile
     {
         FileParams *p = sc->params;
         if (!retval) {
             handle_t handle = vmi_read_dword(cpu, p->phandle);
-            qemulib_log("%08x: open file: %x = %s\n", (int)ctx, (int)handle, p->name);
+            DPRINTF("%08x: open file: %x = %s\n", (int)ctx, (int)handle, p->name);
             file_open(vmi_get_context(cpu), p->name, handle);
             /* Don't free p->name */
         } else {
@@ -346,10 +353,10 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
             handle_t handle = vmi_read_dword(cpu, p->phandle);
             Section *s = section_open(ctx, p->name, handle);
             if (s) {
-                qemulib_log("%08x: open section %x:%s file:%s\n",
+                DPRINTF("%08x: open section %x:%s file:%s\n",
                     (int)ctx, handle, p->name, s->filename);
             } else {
-                qemulib_log("%08x: internal error: no open section %s\n",
+                DPRINTF("%08x: internal error: no open section %s\n",
                     (int)ctx, p->name);
             }
         } else {
@@ -372,7 +379,7 @@ static void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
     case 0x10b: // NtUnmapViewOfSection
         if (!retval) {
             address_t *base = sc->params;
-            qemulib_log("%08x: unmapping section base=%x\n",
+            DPRINTF("%08x: unmapping section base=%x\n",
                 (int)ctx, (int)*base);
             mapping_delete(ctx, *base);
         }
@@ -412,7 +419,7 @@ bool syscall_i386(address_t pc, cpu_t cpu)
     if (code == 0x34) {
         /* Read EAX which contains system call ID */
         uint32_t reg = vmi_get_register(cpu, I386_EAX_REGNUM);
-        qemulib_log("%llx: sysenter %x\n", vmi_get_context(cpu), reg);
+        DPRINTF("%llx: sysenter %x\n", vmi_get_context(cpu), reg);
         void *params = syscall_enter_winxp(reg, pc, cpu);
         if (params) {
             sc_insert(vmi_get_context(cpu),
@@ -422,7 +429,7 @@ bool syscall_i386(address_t pc, cpu_t cpu)
         uint32_t ecx = vmi_get_register(cpu, I386_ECX_REGNUM);
         SCData *sc = sc_find(vmi_get_context(cpu), ecx);
         if (sc) {
-            // qemulib_log("%llx: sysexit %x\n", vmi_get_context(cpu), sc->num);
+            // DPRINTF("%llx: sysexit %x\n", vmi_get_context(cpu), sc->num);
             syscall_exit_winxp(sc, pc, cpu);
             sc_erase(vmi_get_context(cpu), ecx);
         }

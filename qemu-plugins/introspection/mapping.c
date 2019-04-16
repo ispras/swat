@@ -4,6 +4,7 @@
 static void mapping_destroy(gpointer data)
 {
     Mapping *m = data;
+    module_delete(m->module);
     g_free(m->filename);
     g_free(m);
 }
@@ -54,7 +55,7 @@ void mapping_create(context_t ctx, const char *filename,
                     address_t base, address_t size)
 {
     Process *p = process_get(ctx);
-    Mapping *m = g_new(Mapping, 1);
+    Mapping *m = g_new0(Mapping, 1);
     m->filename = g_strdup(filename);
     m->base = base;
     m->size = size;
