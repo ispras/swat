@@ -55,14 +55,6 @@ typedef struct Mapping {
     Module *module;
 } Mapping;
 
-/* Executable module */
-typedef struct Module {
-    Mapping *mapping;
-
-    /* Parser-related information */
-    void *opaque;
-} Module;
-
 /*typedef struct Handle {
     HandleType type;
     handle_t value;
@@ -113,6 +105,7 @@ void mapping_deinit_process(Process *p);
 void mapping_create(context_t ctx, const char *filename,
                     address_t base, address_t size);
 void mapping_delete(context_t ctx, address_t addr);
+Mapping *mapping_find(context_t ctx, address_t addr);
 
 /* Modules */
 void module_delete(Module *module);
@@ -122,7 +115,7 @@ void module_before_tb(address_t pc, cpu_t cpu);
 /* Functions */
 void function_init_process(Process *p);
 void function_deinit_process(Process *p);
-void function_add(context_t ctx, address_t entry);
+void function_add(context_t ctx, address_t entry, const char *name);
 bool function_needs_before_insn(address_t pc, cpu_t cpu);
 void function_before_insn(address_t pc, cpu_t cpu);
 

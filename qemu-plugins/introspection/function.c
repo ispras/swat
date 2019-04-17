@@ -1,9 +1,10 @@
 #include <stdint.h>
 #include "plugins.h"
+#include "regnum.h"
 #include "introspection.h"
 
 typedef struct Function {
-    char nothing_here_yet;
+    char *name;
 } Function;
 
 void function_init_process(Process *p)
@@ -29,14 +30,17 @@ bool function_needs_before_insn(address_t pc, cpu_t cpu)
 
 void function_before_insn(address_t pc, cpu_t cpu)
 {
-    qemulib_log("Some function entry at %x\n", (int)pc);
+    Process *p = process_get(vmi_get_context(cpu));
+    Function *f = g_hash_table_lookup(p->functions, &pc);
+    qemulib_log("Function %x:%s\n", (int)pc, f->name);
 }
 
-void function_add(context_t ctx, address_t entry)
+void function_add(context_t ctx, address_t entry, const char *name)
 {
     Process *p = process_get(ctx);
     gint64 *key = g_new(gint64, 1);
     *key = entry;
     Function *f = g_new0(Function, 1);
+    f->name = g_strdup(name);
     g_hash_table_insert(p->functions, key, f);
 }

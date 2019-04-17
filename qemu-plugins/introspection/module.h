@@ -3,4 +3,6 @@
 
 #include "introspection.h"
 
+bool parse_header_pe(cpu_t cpu, Mapping *m);
+
 #endif // MODULE_H

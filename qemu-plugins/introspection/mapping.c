@@ -62,7 +62,7 @@ void mapping_create(context_t ctx, const char *filename,
     g_tree_insert(p->mappings, m, m);
 }
 
-static Mapping *mapping_find(context_t ctx, address_t addr)
+Mapping *mapping_find(context_t ctx, address_t addr)
 {
     Process *p = process_get(ctx);
     return g_tree_search(p->mappings, mapping_search, &addr);
