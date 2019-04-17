@@ -32,6 +32,12 @@ See more details in [introspection documentation](docs/Introspection.md)
 
 ## Building the SWAT
 
+### Installing prerequisites
+
+    sudo apt install texinfo
+
+### Build
+
     git clone https://github.com/ispras/swat
     cd swat
     git submodule update --init
