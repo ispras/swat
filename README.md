@@ -14,9 +14,15 @@ Reverse debugging allows "executing" the program in reverse direction.
 
 See more details in [reverse debugging documentation](docs/ReverseDebugging.md)
 
+## QEMU Plugins
+
+SWAT includes QEMU which was extended to support instrumentation and introspection plugins.
+
+See more details in [plugin documentation](docs/QemuPlugins.md)
+
 ## Virtual machine introspection
 
-SWAT supports non-intrusive introspection of the virtual machine.
+SWAT supports non-intrusive introspection of the virtual machine with the help of the dynamically loaded plugins.
 
 Non-intrusiveness infers the following features:
 * No need in loading any agents into the guest system
