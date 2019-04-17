@@ -14,6 +14,16 @@ Reverse debugging allows "executing" the program in reverse direction.
 
 See more details in [reverse debugging documentation](docs/ReverseDebugging.md)
 
+## Virtual machine introspection
+
+SWAT supports non-intrusive introspection of the virtual machine.
+
+Non-intrusiveness infers the following features:
+* No need in loading any agents into the guest system
+* Analysis and introspection can work when execution is replayed
+
+See more details in [introspection documentation](docs/Introspection.md)
+
 ## Building the SWAT
 
     git clone https://github.com/ispras/swat
