@@ -10,6 +10,15 @@ cd qemu
 make install
 cd ..
 
+# build gdb
+
+mkdir -p gdb
+cd gdb
+../../binutils-gdb/configure --target=i386-pc-pe --prefix=$dir
+make
+make install
+cd ..
+
 # build everything else
 
 cmake -DCMAKE_INSTALL_PREFIX=../release ..
