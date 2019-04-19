@@ -30,7 +30,7 @@ Non-intrusiveness infers the following features:
 
 See more details in [introspection documentation](docs/Introspection.md)
 
-## Building the SWAT
+## Building the SWAT in Linux
 
 ### Installing prerequisites
 
