@@ -42,3 +42,16 @@ See more details in [introspection documentation](docs/Introspection.md)
     cd swat
     git submodule update --init
     ./rebuild.sh
+
+## Building the SWAT in Windows
+
+### Installing prerequisites
+
+SWAT should be built in MinGW64 environment.
+
+### Build
+
+    git clone https://github.com/ispras/swat
+    cd swat
+    git submodule update --init
+    ./rebuild-win.sh
