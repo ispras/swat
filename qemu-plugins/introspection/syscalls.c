@@ -5,6 +5,8 @@
 #include "regnum.h"
 #include "syscalls.h"
 
+OSType os_type;
+
 SCData *sc_find(context_t ctx, address_t sp)
 {
     Process *p = process_get(ctx);
@@ -31,6 +33,19 @@ void sc_insert(context_t ctx, address_t sp, uint32_t num, void *param)
     }
 }
 
+bool syscall_init(const char *os_name)
+{
+    if (!strcmp(os_name, "WinXP")) {
+        os_type = OS_WINXP;
+        return true;
+    }
+    if (!strcmp(os_name, "Linux")) {
+        os_type = OS_LINUX;
+        return true;
+    }
+
+    return false;
+}
 
 void syscall_init_process(Process *p)
 {

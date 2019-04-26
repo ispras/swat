@@ -4,6 +4,10 @@
 
 bool plugin_init(const char *args)
 {
+    if (!syscall_init(args)) {
+        return false;
+    }
+
     process_init();
     section_init();
 

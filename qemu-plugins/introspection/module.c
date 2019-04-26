@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "plugins.h"
 #include "module.h"
+#include "syscalls.h"
 
 typedef enum ModuleStatus {
     MS_UNKNOWN,
@@ -42,9 +43,11 @@ void module_before_tb(address_t pc, cpu_t cpu)
         module_init(m);
     }
     if (m->module->status == MS_UNKNOWN) {
-        //qemulib_log("Parsing module %s\n", m->filename);
-        if (parse_header_pe(cpu, m)) {
-            m->module->status = MS_PARSED;
+        qemulib_log("Parsing module %s\n", m->filename);
+        if (os_type == OS_WINXP) {
+            if (parse_header_pe(cpu, m)) {
+                m->module->status = MS_PARSED;
+            }
         }
     }
 }
