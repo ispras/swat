@@ -4,7 +4,7 @@
 /* TODO: get rid of this dependency */
 #include "../../qemu/include/elf.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define DPRINTF qemulib_log
 #else
