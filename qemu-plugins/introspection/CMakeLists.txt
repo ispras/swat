@@ -5,7 +5,7 @@ pkg_search_module(GLIB REQUIRED glib-2.0)
 
 add_library(introspection SHARED introspection.c
             context.c file.c function.c helper.c mapping.c
-            module.c module-pe.c
+            module.c module-elf.c module-pe.c
             process.c section.c syscalls.c syscall-i386.c
             syscall-linux.c syscall-windows.c)
 

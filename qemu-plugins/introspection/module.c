@@ -48,6 +48,12 @@ void module_before_tb(address_t pc, cpu_t cpu)
             if (parse_header_pe(cpu, m)) {
                 m->module->status = MS_PARSED;
             }
+        } else if (os_type == OS_LINUX) {
+            if (parse_header_elf(cpu, m)) {
+                m->module->status = MS_PARSED;
+            }
+        } else {
+            m->module->status = MS_PARSED;
         }
     }
 }

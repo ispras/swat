@@ -62,9 +62,6 @@ typedef struct IMAGE_SECTION_HEADER {
     uint32_t Characteristics;
 } PACKED IMAGE_SECTION_HEADER;
 
-/* This could be 4096 on some platforms */
-#define PAGE 1024ULL
-
 /* TODO: endianness */
 #define LOAD(var, offs) do { \
     if (qemulib_read_memory(cpu, image_base + (offs), \
