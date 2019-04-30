@@ -1,3 +1,5 @@
+## Using introspection QEMU plugin
+
 SWAT can trace all API calls within the system.
 
 It currently supports Windows XP and Linux (all possible versions) on i386.
@@ -42,3 +44,17 @@ Function 75b43fc3:CsrQueryApiPort
 54ae000: sysenter 11de
 Function 75b45520:CsrDereferenceThread
 ```
+
+## Introspection plugin internals
+
+Introspection plugin monitors the following instructions:
+* int 80h
+* iret
+* sysenter
+* sysexit
+
+These instructions are used for system call operations on i386.
+
+Plugin intercepts file open/close and file mapping to detect executable module loading in the guest OS.
+
+When CPU starts executing the loaded module, the plugin parses its header and sets tracepoints on every exported function. These tracepoints generate log messages that correspond to the function entries.
