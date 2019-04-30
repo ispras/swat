@@ -1,6 +1,12 @@
 # swat
 SWAT - System-Wide Analysis Toolkit
 
+## QEMU GUI
+
+SWAT includes GUI for managing QEMU virtual machines.
+
+See more details in [qemu-gui documentation](https://github.com/ispras/qemu-gui/blob/master/docs/Using%20qemu-gui.md)
+
 ## WinDbg server
 
 SWAT supports debugging with WinDbg without switching the guest OS to the
