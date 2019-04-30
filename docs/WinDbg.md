@@ -11,3 +11,18 @@ How to start debugging QEMU using WinDbg:
 
 You can add _Symbol Search Path_ in WinDbg such as   
 `srv*c:\tmp*http://msdl.microsoft.com/download/symbols`
+
+## WinDbg server details
+
+The WinDbg debugger has the possibility of connecting to a remote debug server
+(Kdsrv.exe) in the Windows kernel. Therefore, it is possible to connect
+to the guest system running in the QEMU emulator. Kernel debugging is possible
+only with the enabled debugging mode, may change at the same time.
+Our module of WinDbg debugger for QEMU is an alternative of the remote debugging
+service in the kernel. Thus, the debugger connects to the debugging module,
+not to the kernel of the operating system. The module obtains all the necessary
+information answering debugger requests from the QEMU emulator. At the same time
+for debugging there is no need to enable debugging mode in the kernel.
+This leads to hidden debugging. Our module supports all features of WinDbg
+regarding remote debugging, besides interception of events and exceptions.
+Supports i386 and x86_64 architectures.
