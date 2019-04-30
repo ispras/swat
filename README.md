@@ -34,7 +34,7 @@ See more details in [introspection documentation](docs/Introspection.md)
 
 ### Installing prerequisites
 
-    sudo apt install texinfo
+    sudo apt install texinfo gcc libz-dev libsdl1.2-dev libpixman* dh-autoreconf libudev-dev libfdt-dev flex bison
 
 ### Build
 
