@@ -46,7 +46,7 @@ Returns true if the current translation block should be instrumented - plugin_be
 Called for the beginning of the translation blocks (in the translation phase)
 hat were approved by plugin_needs_before_tb function.
 
-### Function of QEMU core available for plugins
+### Functions of QEMU core available for plugins
 
 #### void qemulib_log(const char *fmt, ...)
 
@@ -61,3 +61,26 @@ Function for reading the guest memory from the plugins. Returns non-zero in case
 Function for reading the value of the specific register.
 
 Register IDs are specified in qemu/plugins/include/regnum.h header file.
+
+### Instruction logging plugin example
+
+```
+#include <stdint.h>
+#include <stdio.h>
+#include "plugins.h"
+
+bool plugin_init(const char *args)
+{
+    return true;
+}
+
+bool plugin_needs_before_insn(uint64_t pc, void *cpu)
+{
+    return true;
+}
+
+void plugin_before_insn(uint64_t pc, void *cpu)
+{
+    qemulib_log("executing instruction at %lx\n", pc);
+}
+```
