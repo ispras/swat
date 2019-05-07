@@ -116,8 +116,8 @@ we created Linux driver for USB stick.
 Driver code contains a bug - when request from user is processed 
 the kernel panics and user has to reboot the machine.
 
-```long usbInfoIoctl(struct file *f, 
-    unsigned int cmd, unsigned long arg)
+```
+long usbInfoIoctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
   int i;
   struct urb *urb;
