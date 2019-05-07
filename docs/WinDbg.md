@@ -27,3 +27,16 @@ for debugging there is no need to enable debugging mode in the kernel.
 This leads to hidden debugging. Our module supports all features of WinDbg
 regarding remote debugging, besides interception of events and exceptions.
 Supports i386 and x86_64 architectures.
+
+## Examples:
+
+### Startup:
+Run qemu and windbg, and wait:
+
+![Windbg connection 1](./imgs/windbg_connect1.png)
+![Windbg connection 2](./imgs/windbg_connect2.png)
+
+Now, press 'ctrl+break' and wait stopping:
+
+![Windbg connection 3](./imgs/windbg_connect3.png)
+![Windbg connection 4](./imgs/windbg_connect4.png)
