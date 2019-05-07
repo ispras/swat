@@ -21,13 +21,13 @@ a couple of the headers.
 
 ### Functions that plugin should provide
 
-#### bool plugin_init(const char *args);
+#### bool plugin_init(const char *args)
 
 Initializes plugin data structures. Should return true if plugin was successfully initialized.
 
 Arguments are passed to the plugin though the command line: -plugin file=$dir/libplugin.so,args="List of the arguments"
 
-#### bool plugin_needs_before_insn(uint64_t pc, void *cpu);
+#### bool plugin_needs_before_insn(uint64_t pc, void *cpu)
 
 Returns true if the current location should be instrumented - plugin_before_insn should be called.
 
