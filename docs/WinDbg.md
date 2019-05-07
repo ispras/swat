@@ -40,3 +40,17 @@ Now, press 'ctrl+break' and wait stopping:
 
 ![Windbg connection 3](./imgs/windbg_connect3.png)
 ![Windbg connection 4](./imgs/windbg_connect4.png)
+
+### View process list:
+![Windbg process list](./imgs/windbg_proc_list.png)
+
+### View call stack:
+![Windbg call stack](./imgs/windbg_call_stack.png)
+
+### View registers:
+![Windbg registers](./imgs/windbg_registers.png)
+
+### Breakpoints:
+Set breakpoints and press 'go':
+![Windbg breakpoints 1](./imgs/windbg_breakpoints1.png)
+![Windbg breakpoints 2](./imgs/windbg_breakpoints2.png)
