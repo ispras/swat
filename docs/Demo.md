@@ -21,7 +21,7 @@ The window "Create Virtual Machine" contains four parameters group:
     - Select exist disk
     - Create new disk
 
-![Create VM form](../qemu-gui/docs/imgs/create_vm.png) 
+![Create VM form](https://github.com/ispras/qemu-gui/blob/master/docs/imgs/create_vm.png) 
     
 ### Edit VM settings
 
@@ -31,7 +31,7 @@ Some devices have a set of options, which you can change. It include select valu
 
 There is a line for additional command line common qemu parameters on the bottom, if is necessary set specific options.
 
-![VM settings form](./imgs/vm_settings.png) 
+![VM settings form](https://github.com/ispras/qemu-gui/blob/master/docs/imgs/vm_settings.png) 
 
 #### Specific command line options example
 
@@ -59,7 +59,7 @@ Execution may be replayed only from the qemu with which it was recorded.
 
 You can set icount value and enable/disable autosnapshot function. Autospapshot needs value of period in second.
 
-![Create execution](./imgs/recordreplay.png) 
+![Create execution](https://github.com/ispras/qemu-gui/blob/master/docs/imgs/recordreplay.png) 
 
 ## WinDbg server
 
