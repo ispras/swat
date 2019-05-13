@@ -21,7 +21,7 @@ The window "Create Virtual Machine" contains four parameters group:
     - Select exist disk
     - Create new disk
 
-![Create VM form](./imgs/create_vm.png) 
+![Create VM form](../qemu-gui/docs/imgs/create_vm.png) 
     
 ### Edit VM settings
 
