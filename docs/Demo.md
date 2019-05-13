@@ -1,3 +1,5 @@
+# SWAT overview
+
 ## QEMU GUI
 
 SWAT includes GUI for managing QEMU virtual machines.
@@ -29,25 +31,7 @@ Available devices present as a tree in the left on the form. Right click on node
 
 Some devices have a set of options, which you can change. It include select values from lists, set values, add additional options to command line.
 
-There is a line for additional command line common qemu parameters on the bottom, if is necessary set specific options.
-
 ![VM settings form](https://github.com/ispras/qemu-gui/blob/master/docs/imgs/vm_settings.png) 
-
-#### Specific command line options example
-
-Enable logfiles
-
-`
--D logfile -d in_asm
-`
-
-Use specific boot option
-
-`
--kernel kernel-qemu-4.4.34-jessie
-`
-
-If you make changes, all record/replay execution will be deleted, because set of devices influence on executions and they will not work.
 
 ### Record/Replay
 
@@ -57,7 +41,7 @@ All existing executions for VM are showing on the tab "Record/Replay".
 
 Execution may be replayed only from the qemu with which it was recorded.
 
-You can set icount value and enable/disable autosnapshot function. Autospapshot needs value of period in second.
+You can set icount value and enable/disable autosnapshot function. Autospapshot needs value of period in seconds.
 
 ![Create execution](https://github.com/ispras/qemu-gui/blob/master/docs/imgs/recordreplay.png) 
 
