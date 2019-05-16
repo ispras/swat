@@ -214,9 +214,9 @@ Running API tracing:
     # SWAT installation directory
     dir=/usr/local
     # Run API tracing for Windows XP
-    $dir/bin/qemu-system-i386 -D api.log -plugin $dir/lib/libintrospection.so,args="WinXP" -snapshot -hda WinXP.qcow2
+    $dir/bin/qemu-system-i386 -D api.log -plugin file=$dir/lib/libintrospection.so,args="WinXP" -snapshot -hda WinXP.qcow2
     # Run API tracing for Linux
-    $dir/bin/qemu-system-i386 -D api.log -plugin $dir/lib/libintrospection.so,args="Linux" -snapshot -hda Linux.qcow2
+    $dir/bin/qemu-system-i386 -D api.log -plugin file=$dir/lib/libintrospection.so,args="Linux" -snapshot -hda Linux.qcow2
 
 Execution log is saved into the file api.log. It includes list of the executed system call id's and the list of the executed named functions.
 
