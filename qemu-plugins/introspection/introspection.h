@@ -74,6 +74,7 @@ context_t vmi_get_context(cpu_t cpu);
 address_t vmi_get_stack_pointer(cpu_t cpu);
 
 /* System calls */
+bool syscall_init(const char *os_name);
 void syscall_init_process(Process *p);
 void syscall_deinit_process(Process *p);
 bool syscall_needs_before_insn(address_t pc, cpu_t cpu);
