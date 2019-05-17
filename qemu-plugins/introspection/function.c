@@ -30,9 +30,10 @@ bool function_needs_before_insn(address_t pc, cpu_t cpu)
 
 void function_before_insn(address_t pc, cpu_t cpu)
 {
-    Process *p = process_get(vmi_get_context(cpu));
+    context_t ctx = vmi_get_context(cpu);
+    Process *p = process_get(ctx);
     Function *f = g_hash_table_lookup(p->functions, &pc);
-    qemulib_log("Function %x:%s\n", (int)pc, f->name);
+    qemulib_log("%llx: function %llx:%s\n", ctx, pc, f->name);
 }
 
 void function_add(context_t ctx, address_t entry, const char *name)
