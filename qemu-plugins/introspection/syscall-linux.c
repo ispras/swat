@@ -10,6 +10,28 @@
 static inline void DPRINTF(const char *fmt, ...) {}
 #endif
 
+#define SOCKETCALL_SOCKET      1
+#define SOCKETCALL_BIND        2
+#define SOCKETCALL_CONNECT     3
+#define SOCKETCALL_LISTEN      4
+#define SOCKETCALL_ACCEPT      5
+#define SOCKETCALL_GETSOCKNAME 6
+#define SOCKETCALL_GETPEERNAME 7
+#define SOCKETCALL_SOCKETPAIR  8
+#define SOCKETCALL_SEND        9
+#define SOCKETCALL_RECV        10
+#define SOCKETCALL_SENDTO      11
+#define SOCKETCALL_RECVFROM    12
+#define SOCKETCALL_SHUTDOWN    13
+#define SOCKETCALL_SETSOCKOPT  14
+#define SOCKETCALL_GETSOCKOPT  15
+#define SOCKETCALL_SENDMSG     16
+#define SOCKETCALL_RECVMSG     17
+#define SOCKETCALL_ACCEPT4     18
+#define SOCKETCALL_RECVMMSG    19
+#define SOCKETCALL_SENDMMSG    20
+
+
 void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu)
 {
     void *params = NULL;
@@ -48,6 +70,33 @@ void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu)
     case 90: // sys_mmap
     {
         DPRINTF("%08x: TODO: trying to mmap\n", (int)ctx);
+        return NULL;
+    }
+    case 102: // sys_socketcall
+    {
+        switch (param1)
+        {
+            case SOCKETCALL_SENDMSG:
+            {
+                DPRINTF("%08x: sendmsg\n", (int)ctx);
+                uint32_t args = param2;
+                //uint32_t sockfd = vmi_read_dword(cpu, args);
+                uint32_t msg = vmi_read_dword(cpu, args + 4);
+                //uint32_t flags = vmi_read_dword(cpu, args + 8);
+                uint32_t iov = vmi_read_dword(cpu, msg + 8);
+                uint32_t iovlen = vmi_read_dword(cpu, msg + 12);
+                while (iovlen--) {
+                    char *str = vmi_strdup(cpu, iov, 0);
+                    DPRINTF("--- buf: %s\n", str);
+                    g_free(str);
+                    iov += 8;
+                }
+                break;
+            }
+            default:
+                DPRINTF("%08x: TODO: socketcall %x\n", (int)ctx, param1);
+                break;
+        }
         return NULL;
     }
     case 192: // sys_mmap2
