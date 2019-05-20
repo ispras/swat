@@ -10,11 +10,27 @@ cd qemu
 make install
 cd ..
 
-# build gdb
-
+# build multiarch gdb
 mkdir -p gdb
 cd gdb
-../../binutils-gdb/configure --target=i386-pc-pe --prefix=$dir
+../../binutils-gdb/configure \
+    --prefix=$dir \
+    --disable-gdbtk \
+    --disable-shared \
+    --disable-readline \
+    --with-system-readline \
+    --with-expat \
+    --with-system-zlib \
+    --without-guile \
+    --without-babeltrace \
+    --with-babeltrace \
+    --enable-tui \
+    --with-lzma \
+    --with-python=python3 \
+    --enable-64-bit-bfd \
+    --disable-sim \
+    --enable-targets="aarch64-linux-gnu arm-linux-gnu arm-linux-gnueabi arm-linux-gnueabihf i686-linux-gnu ia64-linux-gnu mips-linux-gnu mipsel-linux-gnu mips64-linux-gnu mips64el-linux-gnu x86_64-linux-gnu"
+
 make
 make install
 cd ..
