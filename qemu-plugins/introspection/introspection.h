@@ -63,6 +63,7 @@ typedef struct Mapping {
 
 /* Guest data extraction helpers */
 uint64_t vmi_get_register(cpu_t cpu, int reg);
+uint8_t vmi_read_byte(cpu_t cpu, address_t addr);
 uint16_t vmi_read_word(cpu_t cpu, address_t addr);
 uint32_t vmi_read_dword(cpu_t cpu, address_t addr);
 char *vmi_strdup(cpu_t cpu, address_t addr, address_t maxlen);

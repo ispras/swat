@@ -9,6 +9,13 @@ uint64_t vmi_get_register(cpu_t cpu, int reg)
     return retval;
 }
 
+uint8_t vmi_read_byte(cpu_t cpu, address_t addr)
+{
+    uint8_t res = 0;
+    qemulib_read_memory(cpu, addr, (uint8_t*)&res, sizeof(res));
+    return res;
+}
+
 uint16_t vmi_read_word(cpu_t cpu, address_t addr)
 {
     uint16_t res = 0;
