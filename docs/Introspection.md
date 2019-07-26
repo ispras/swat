@@ -58,3 +58,26 @@ These instructions are used for system call operations on i386.
 Plugin intercepts file open/close and file mapping to detect executable module loading in the guest OS.
 
 When CPU starts executing the loaded module, the plugin parses its header and sets tracepoints on every exported function. These tracepoints generate log messages that correspond to the function entries.
+
+## Firmware introspection
+
+We tested SWAT on several Linux-based OS for the routers.
+There is the list of the tested firmwares, where we've got a log of the system calls:
+
+| Firmware | Kernel version |
+|----------|----------------|
+| Alpine Linux 3.7.0 | 4.9.65-1 |
+| DD-WRT v24 | 2.6.23.17 |
+| Endian Firewall 2.1.2 | 2.6.9-55 |
+| floppyfw 3.0.14 | 2.4.37.10 |
+| IPCop 2.1.8 | 3.4-3 |
+| IPFire 2.19 | 3.14.79 |
+| LEAF 3.1 | 2.4.34 |
+| LEAF 6.1.1 | 4.9.68 |
+| LEDE 17.01.4 | 4.4.92 |
+| MikroTIK 6.41 | |
+| Openwall 3.1 | 2.6.18-408 |
+| OpenWRT 15.05 | 3.18.23 |
+| Untangle | 3.16.0.4 |
+| ZeroShell 2.0 | 3.4.6 |
+
