@@ -24,6 +24,11 @@ static inline void DPRINTF(const char *fmt, ...) {}
 
 static bool elf_check_ident(elfhdr *ehdr)
 {
+    DPRINTF("ELF ident %x %x %x %x %x %x %x\n",
+        ehdr->e_ident[EI_MAG0], ehdr->e_ident[EI_MAG1],
+        ehdr->e_ident[EI_MAG2], ehdr->e_ident[EI_MAG3],
+        ehdr->e_ident[EI_CLASS], ehdr->e_ident[EI_DATA],
+        ehdr->e_ident[EI_VERSION]);
     return (ehdr->e_ident[EI_MAG0] == ELFMAG0
             && ehdr->e_ident[EI_MAG1] == ELFMAG1
             && ehdr->e_ident[EI_MAG2] == ELFMAG2
@@ -76,6 +81,9 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
             dynoff = offset;
             dynvaddr = vaddr;
             dynsz = filesz;
+            if (!dynsz) {
+                dynsz = memsz;
+            }
         }
         DPRINTF("\tentry type=0x%x off=0x%x vaddr=0x%x filesz=0x%x memsz=0x%x\n", type, offset, vaddr, filesz, memsz);
     }
@@ -115,7 +123,7 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
         }
     }
     if (!strtab || !symtab || !strsz || !syment) {
-        DPRINTF("unknown format\n");
+        DPRINTF("unknown format %x %x %x %x\n", strtab, symtab, strsz, syment);
         return true;
     }
     // read symbol table

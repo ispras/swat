@@ -27,6 +27,7 @@ typedef struct Process {
     GHashTable *syscalls;
     /* List of the file mappings */
     GTree *mappings;
+    GTree *mappings_by_name;
     /* List of the functions */
     GHashTable *functions;
     

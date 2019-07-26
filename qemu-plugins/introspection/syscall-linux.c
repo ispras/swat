@@ -162,7 +162,9 @@ void syscall_exit_linux(SCData *sc, address_t pc, cpu_t cpu)
     {
         MapFileParams *p = sc->params;
         if (retval != -1UL) {
-            DPRINTF("%08x: mmap2 %x:%s\n", (int)ctx, (int)retval, p->file->filename);
+            DPRINTF("%08x: mmap2 %x+%x:%x:%s\n",
+                (int)ctx, (int)retval, (int)p->offset * 4096, (int)p->size,
+                p->file->filename);
             mapping_create(ctx, p->file->filename, retval, p->size);
         } else {
             DPRINTF("%08x: failed to mmap2 of the file: %s\n", (int)ctx, p->file->filename);
