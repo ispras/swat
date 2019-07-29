@@ -8,6 +8,7 @@
 typedef enum OSType {
 	OS_UNKNOWN,
 	OS_WINXP,
+    OS_WIN10x64,
 	OS_LINUX,
 } OSType;
 
@@ -55,6 +56,10 @@ void sc_erase(context_t ctx, address_t sp);
 /* Functions for detecting and processing i386 syscalls */
 bool is_syscall_i386(address_t pc, cpu_t cpu);
 void syscall_i386(address_t pc, cpu_t cpu);
+
+/* Functions for detecting and processing x86_64 syscalls */
+bool is_syscall_x86_64(address_t pc, cpu_t cpu);
+void syscall_x86_64(address_t pc, cpu_t cpu);
 
 /* WinXP on i386 */
 void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu);

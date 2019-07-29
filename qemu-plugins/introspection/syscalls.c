@@ -39,6 +39,10 @@ bool syscall_init(const char *os_name)
         os_type = OS_WINXP;
         return true;
     }
+    if (!strcmp(os_name, "Win10x64")) {
+        os_type = OS_WIN10x64;
+        return true;
+    }
     if (!strcmp(os_name, "Linux")) {
         os_type = OS_LINUX;
         return true;
@@ -62,10 +66,14 @@ void syscall_deinit_process(Process *p)
 
 bool syscall_needs_before_insn(address_t pc, cpu_t cpu)
 {
-    return is_syscall_i386(pc, cpu);
+    return is_syscall_i386(pc, cpu) || is_syscall_x86_64(pc, cpu);
 }
 
 void syscall_before_insn(address_t pc, cpu_t cpu)
 {
-    syscall_i386(pc, cpu);
+    if (is_syscall_i386(pc, cpu)) {
+        syscall_i386(pc, cpu);
+    } else {
+        syscall_x86_64(pc, cpu);
+    }
 }
