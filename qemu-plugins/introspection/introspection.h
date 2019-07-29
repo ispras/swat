@@ -6,6 +6,12 @@
 #include <wchar.h>
 #include <glib.h>
 
+typedef enum ArchType {
+    ARCH_UNKNOWN = 0,
+    ARCH_I386,
+    ARCH_X86_64,
+} ArchType;
+
 typedef void * cpu_t;
 typedef uint64_t address_t;
 typedef uint64_t context_t;
@@ -74,6 +80,7 @@ char *vmi_strdupw(cpu_t cpu, address_t addr, address_t maxlen);
 /* Execution context */
 context_t vmi_get_context(cpu_t cpu);
 address_t vmi_get_stack_pointer(cpu_t cpu);
+ArchType vmi_get_arch_type(void);
 
 /* System calls */
 bool syscall_init(const char *os_name);
