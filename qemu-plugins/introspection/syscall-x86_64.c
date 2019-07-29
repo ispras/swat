@@ -49,19 +49,29 @@ void syscall_x86_64(address_t pc, cpu_t cpu)
     qemulib_read_memory(cpu, pc + 1, &code, 1);
     if (code == 0x05) {
         /* syscall */
-        /*uint32_t reg = vmi_get_register(cpu, I386_EAX_REGNUM);
-        DPRINTF("%llx: sysenter %x\n", ctx, reg);
+        uint32_t reg = vmi_get_register(cpu, AMD64_RAX_REGNUM);
+        DPRINTF("%llx: syscall %x\n", ctx, reg);
         void *params = NULL;
-        if (os_type == OS_WINXP) {
-            params = syscall_enter_winxp(reg, pc, cpu);
-        } else if (os_type == OS_LINUX) {
+        if (os_type == OS_WIN10x64) {
+            //params = syscall_enter_win10x64(reg, pc, cpu);
+        }/* else if (os_type == OS_LINUX) {
             params = syscall_enter_linux(reg, pc, cpu);
-        }
-        if (params) {
+        }*/
+        /*if (params) {
             sc_insert(ctx, vmi_get_stack_pointer(cpu), reg, params);
         }*/
     } else {
         /* sysret */
-        DPRINTF("sysret\n");
+        uint64_t rcx = vmi_get_register(cpu, AMD64_RCX_REGNUM);
+        SCData *sc = sc_find(ctx, rcx);
+        if (sc) {
+            DPRINTF("%llx: sysret %x\n", vmi_get_context(cpu), sc->num);
+            if (os_type == OS_WIN10x64) {
+                //syscall_exit_win10x64(sc, pc, cpu);
+            }/* else if (os_type == OS_LINUX) {
+                syscall_exit_linux(sc, pc, cpu);
+            }*/
+            sc_erase(ctx, rcx);
+        }
     }
 }
