@@ -32,6 +32,14 @@ uint32_t vmi_read_dword(cpu_t cpu, address_t addr)
     return res;
 }
 
+uint64_t vmi_read_qword(cpu_t cpu, address_t addr)
+{
+    uint64_t res = 0;
+    qemulib_read_memory(cpu, addr, (uint8_t*)&res, sizeof(res));
+    // TODO: swap bytes
+    return res;
+}
+
 char *vmi_strdup(cpu_t cpu, address_t addr, address_t maxlen)
 {
     if (!addr) {

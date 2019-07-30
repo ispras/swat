@@ -65,9 +65,9 @@ void syscall_x86_64(address_t pc, cpu_t cpu);
 void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu);
 void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu);
 
-/* WinXP on x86_64 */
-void *syscall_enter_win10x64(uint32_t sc, address_t pc, cpu_t cpu);
-void syscall_exit_win10x64(SCData *sc, address_t pc, cpu_t cpu);
+/* Windows on x86_64 */
+void *syscall_enter_win64(uint32_t sc, address_t pc, cpu_t cpu);
+void syscall_exit_win64(SCData *sc, address_t pc, cpu_t cpu);
 
 /* Linux on i386 (TODO: and others) */
 void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu);

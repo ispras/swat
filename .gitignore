@@ -2,3 +2,4 @@ build/*
 release/*
 build-win/*
 release-win/*
+.vscode/*
