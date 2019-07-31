@@ -44,7 +44,7 @@ void module_before_tb(address_t pc, cpu_t cpu)
     }
     if (m->module->status == MS_UNKNOWN) {
         qemulib_log("Parsing module %s\n", m->filename);
-        if (os_type == OS_WINXP) {
+        if (os_type == OS_WINXP || os_type == OS_WIN10x64) {
             if (parse_header_pe(cpu, m)) {
                 m->module->status = MS_PARSED;
             }

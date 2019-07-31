@@ -78,9 +78,10 @@ bool parse_header_pe(cpu_t cpu, Mapping *m)
     uint16_t magic;
     LOAD(magic, offsetof(IMAGE_DOS_HEADER, e_magic));
     if (magic != 0x5a4d) {
-        DPRINTF( "No DOS magic\n");
+        DPRINTF("No DOS magic\n");
         return true;
     }
+    DPRINTF("DOS magic is ok\n");
     uint32_t base;
     LOAD(base, offsetof(IMAGE_DOS_HEADER, e_lfanew));
     // check PE header
@@ -92,15 +93,15 @@ bool parse_header_pe(cpu_t cpu, Mapping *m)
         DPRINTF( "No PE magic\n");
         return true;
     }
+    DPRINTF( "PE magic is ok\n");
 
     PEHeader pe_header;
 
     offs += 4;
-#ifdef DEBUG
     DPRINTF( "header\n");
     // machine
     LOAD(pe_header.machine, offs);
-#endif
+    bool is64 = pe_header.machine == 0x8664;
     offs += 2;
     DPRINTF("machine: 0x%x\n", pe_header.machine);
     // number of sections
@@ -135,12 +136,25 @@ bool parse_header_pe(cpu_t cpu, Mapping *m)
     DPRINTF("characteristics: 0x%x\n", pe_header.characteristics);
 #endif
     offs += 2;
+
+    uint16_t pe32magic;
+    LOAD(pe32magic, offs);
+    DPRINTF("pe32 magic: 0x%x\n", pe32magic);
+    bool is32plus = pe32magic == 0x20b;
     
-    offs += 28;
-    uint32_t imageBase;
-    LOAD(imageBase, offs); // 8 bytes in 64-bit mode
-    DPRINTF("ImageBase: 0x%x\n", imageBase);
-    offs += 4;
+    offs += 24;
+    uint64_t imageBase;
+    if (is32plus) {
+        LOAD(imageBase, offs); // 8 bytes in 64-bit mode
+        offs += 8;
+    } else {
+        offs += 4;
+        uint32_t imageBase32;
+        LOAD(imageBase32, offs); // 8 bytes in 64-bit mode
+        offs += 4;
+        imageBase = imageBase32;
+    }
+    DPRINTF("ImageBase: 0x%llx\n", imageBase);
 #ifdef DEBUG
     uint32_t sectionAlign;
     LOAD(sectionAlign, offs);
@@ -152,7 +166,7 @@ bool parse_header_pe(cpu_t cpu, Mapping *m)
     DPRINTF("FileAligment: 0x%x\n", fileAligment);
     offs += 4;
     
-    offs += 56;
+    offs += is32plus ? 72 : 56;
 
     uint32_t exp_addr = 0;
     int i;
@@ -322,7 +336,7 @@ bool parse_header_pe(cpu_t cpu, Mapping *m)
         // get function address
         LOAD(addr, addrOfFunc + ord * 4);
 
-        DPRINTF("Function: %x:%s\n", (int)addr + image_base, name);
+        DPRINTF("Function: %llx:%s\n", addr + image_base, name);
         function_add(vmi_get_context(cpu), addr + image_base, name);
     }
     DPRINTF("Parsing is finished\n");
