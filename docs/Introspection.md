@@ -2,7 +2,7 @@
 
 SWAT can trace all API calls within the system.
 
-It currently supports Windows XP and Linux (all possible versions) on i386.
+It currently supports Windows XP/32, Windows 10/64, and Linux/32 (all possible versions).
 
 Running API tracing:
 
@@ -10,6 +10,8 @@ Running API tracing:
     dir=/usr/local
     # Run API tracing for Windows XP
     $dir/bin/qemu-system-i386 -D api.log -plugin file=$dir/lib/libintrospection.so,args="WinXP" -snapshot -hda WinXP.qcow2
+    # Run API tracing for Windows 10
+    $dir/bin/qemu-system-x86_64 -D api.log -plugin file=$dir/lib/libintrospection.so,args="Win10x64" -snapshot -hda WinXP.qcow2
     # Run API tracing for Linux
     $dir/bin/qemu-system-i386 -D api.log -plugin file=$dir/lib/libintrospection.so,args="Linux" -snapshot -hda Linux.qcow2
 
@@ -51,6 +53,8 @@ Introspection plugin monitors the following instructions:
 * int 80h
 * iret
 * sysenter
+* sysexit
+* syscall
 * sysexit
 
 These instructions are used for system call operations on i386.
