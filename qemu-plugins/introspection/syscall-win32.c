@@ -231,6 +231,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
             DPRINTF("unsupported query information for handle %x class %d\n",
                 (int)handle, info);
         }
+        break;
     }
     case 0xb7: // NtReadFile
         break;

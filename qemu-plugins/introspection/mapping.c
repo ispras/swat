@@ -99,6 +99,7 @@ void mapping_delete(context_t ctx, address_t addr)
     Process *p = process_get(ctx);
     Mapping *m = mapping_find(ctx, addr);
     if (m) {
+        g_tree_remove(p->mappings_by_name, m->filename);
         g_tree_remove(p->mappings, m);
     }    
 }
