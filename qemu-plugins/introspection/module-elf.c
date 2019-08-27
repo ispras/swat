@@ -152,7 +152,9 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
             str[k] = 0;
 
             DPRINTF("Function: %x:%s\n", (int)addr + image_base, str);
-            function_add(vmi_get_context(cpu), addr + image_base, str);
+            char *fullname = g_strjoin(":", m->filename, str, NULL);
+            function_add(vmi_get_context(cpu), addr + image_base, fullname);
+            g_free(fullname);
         }
     }
 

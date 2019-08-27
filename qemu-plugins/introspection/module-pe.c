@@ -337,7 +337,9 @@ bool parse_header_pe(cpu_t cpu, Mapping *m)
         LOAD(addr, addrOfFunc + ord * 4);
 
         DPRINTF("Function: %llx:%s\n", addr + image_base, name);
-        function_add(vmi_get_context(cpu), addr + image_base, name);
+        char *fullname = g_strjoin(":", m->filename, name, NULL);
+        function_add(vmi_get_context(cpu), addr + image_base, fullname);
+        g_free(fullname);
     }
     DPRINTF("Parsing is finished\n");
 
