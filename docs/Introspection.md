@@ -2,7 +2,7 @@
 
 SWAT can trace all API calls within the system.
 
-It currently supports Windows XP/32, Windows 10/64, and Linux/32 (all possible versions).
+It currently supports Windows XP/32, Windows 10/64, Linux/32 (all possible versions), and Linux/64 (all possible versions).
 
 Running API tracing:
 
@@ -55,7 +55,7 @@ Introspection plugin monitors the following instructions:
 * sysenter
 * sysexit
 * syscall
-* sysexit
+* sysret
 
 These instructions are used for system call operations on i386.
 
