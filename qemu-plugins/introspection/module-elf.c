@@ -13,16 +13,9 @@ static inline void DPRINTF(const char *fmt, ...) {}
 
 #define PACKED __attribute__ ((packed))
 
-#define elfhdr Elf32_Ehdr
-#define elf_sym Elf32_Sym
-#define elf_phdr Elf32_Phdr
-#define elf_shdr Elf32_Shdr
-#define elf_dyn Elf32_Dyn
-
-#define ELF_CLASS ELFCLASS32
 #define ELF_DATA ELFDATA2LSB
 
-static bool elf_check_ident(elfhdr *ehdr)
+static bool elf_check_ident(Elf32_Ehdr *ehdr)
 {
     DPRINTF("ELF ident %x %x %x %x %x %x %x\n",
         ehdr->e_ident[EI_MAG0], ehdr->e_ident[EI_MAG1],
@@ -33,7 +26,6 @@ static bool elf_check_ident(elfhdr *ehdr)
             && ehdr->e_ident[EI_MAG1] == ELFMAG1
             && ehdr->e_ident[EI_MAG2] == ELFMAG2
             && ehdr->e_ident[EI_MAG3] == ELFMAG3
-            && ehdr->e_ident[EI_CLASS] == ELF_CLASS
             && ehdr->e_ident[EI_DATA] == ELF_DATA
             && ehdr->e_ident[EI_VERSION] == EV_CURRENT);
 }
@@ -45,13 +37,20 @@ static bool elf_check_ident(elfhdr *ehdr)
         return false; \
     } } while(0)
 
+#define LOAD32(var, offs) do { \
+        uint32_t v;            \
+        LOAD(v, offs);         \
+        var = v;               \
+    } while (0)
+
 bool parse_header_elf(cpu_t cpu, Mapping *m)
 {
     address_t image_base = m->base;
     address_t size = m->size;
-    int i;
+    uint64_t i;
     
-    elfhdr ehdr;
+    // The header beginning is the same for 32 and 64
+    Elf32_Ehdr ehdr;
     LOAD(ehdr, 0);
 
     // First of all, some simple consistency checks
@@ -60,23 +59,40 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
     }
     // skip other checks
 
+    bool is64 = ehdr.e_ident[EI_CLASS] == ELFCLASS64;
+
     // read program header
     uint16_t phnum, phentsize;
-    uint32_t phoff;
-    LOAD(phnum, offsetof(elfhdr, e_phnum));
-    LOAD(phentsize, offsetof(elfhdr, e_phentsize));
-    LOAD(phoff, offsetof(elfhdr, e_phoff));
-    DPRINTF("program header off=0x%x entsize=0x%x num=0x%x\n", phoff, phentsize, phnum);
+    uint64_t phoff;
+    if (is64) {
+        LOAD(phnum, offsetof(Elf64_Ehdr, e_phnum));
+        LOAD(phentsize, offsetof(Elf64_Ehdr, e_phentsize));
+        LOAD(phoff, offsetof(Elf64_Ehdr, e_phoff));
+    } else {
+        LOAD(phnum, offsetof(Elf32_Ehdr, e_phnum));
+        LOAD(phentsize, offsetof(Elf32_Ehdr, e_phentsize));
+        LOAD32(phoff, offsetof(Elf32_Ehdr, e_phoff));
+    }
+    DPRINTF("program header off=0x%llx entsize=0x%x num=0x%x\n", phoff, phentsize, phnum);
 
-    uint32_t dynoff = -1, dynvaddr = -1, dynsz = 1;
+    uint64_t dynoff = -1ULL, dynvaddr = -1ULL, dynsz = 1;
     for (i = 0 ; i < phnum ; ++i) {
-        uint32_t off = phoff + i * phentsize;
-        uint32_t type, offset, vaddr, filesz, memsz;
-        LOAD(type, off + offsetof(elf_phdr, p_type));
-        LOAD(offset, off + offsetof(elf_phdr, p_offset));
-        LOAD(vaddr, off + offsetof(elf_phdr, p_vaddr));
-        LOAD(filesz, off + offsetof(elf_phdr, p_filesz));
-        LOAD(memsz, off + offsetof(elf_phdr, p_memsz));
+        uint64_t off = phoff + i * phentsize;
+        uint32_t type;
+        uint64_t offset, vaddr, filesz, memsz;
+        if (is64) {
+            LOAD(type, off + offsetof(Elf64_Phdr, p_type));
+            LOAD(offset, off + offsetof(Elf64_Phdr, p_offset));
+            LOAD(vaddr, off + offsetof(Elf64_Phdr, p_vaddr));
+            LOAD(filesz, off + offsetof(Elf64_Phdr, p_filesz));
+            LOAD(memsz, off + offsetof(Elf64_Phdr, p_memsz));
+        } else {
+            LOAD(type, off + offsetof(Elf32_Phdr, p_type));
+            LOAD32(offset, off + offsetof(Elf32_Phdr, p_offset));
+            LOAD32(vaddr, off + offsetof(Elf32_Phdr, p_vaddr));
+            LOAD32(filesz, off + offsetof(Elf32_Phdr, p_filesz));
+            LOAD32(memsz, off + offsetof(Elf32_Phdr, p_memsz));
+        }
         if (type == PT_DYNAMIC) {
             dynoff = offset;
             dynvaddr = vaddr;
@@ -85,22 +101,29 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
                 dynsz = memsz;
             }
         }
-        DPRINTF("\tentry type=0x%x off=0x%x vaddr=0x%x filesz=0x%x memsz=0x%x\n", type, offset, vaddr, filesz, memsz);
+        DPRINTF("\tentry type=0x%x off=0x%llx vaddr=0x%llx filesz=0x%llx memsz=0x%llx\n",
+            type, offset, vaddr, filesz, memsz);
     }
 
-    if (dynoff == -1 || dynvaddr == -1) {
+    if (dynoff == -1ULL || dynvaddr == -1ULL) {
         DPRINTF("unknown format\n");
         return true;
     }
 
     // read dynamic section
     DPRINTF("dynamic section entries\n");
-    uint32_t strtab = 0, symtab = 0, strsz = 0, syment = 0;
-    for (i = 0 ; i < dynsz ; i += sizeof(elf_dyn)) {
-        uint32_t tag, val;
-        LOAD(tag, dynvaddr + i + offsetof(elf_dyn, d_tag));
-        LOAD(val, dynvaddr + i + offsetof(elf_dyn, d_un));
-        DPRINTF("\tentry tag=0x%x val=0x%x\n", tag, val);
+    uint64_t strtab = 0, symtab = 0, strsz = 0, syment = 0;
+    for (i = 0 ; i < dynsz ;
+        i += is64 ? sizeof(Elf64_Dyn) : sizeof(Elf32_Dyn)) {
+        uint64_t tag, val;
+        if (is64) {
+            LOAD(tag, dynvaddr + i + offsetof(Elf64_Dyn, d_tag));
+            LOAD(val, dynvaddr + i + offsetof(Elf64_Dyn, d_un));
+        } else {
+            LOAD32(tag, dynvaddr + i + offsetof(Elf32_Dyn, d_tag));
+            LOAD32(val, dynvaddr + i + offsetof(Elf32_Dyn, d_un));
+        }
+        DPRINTF("\tentry tag=0x%llx val=0x%llx\n", tag, val);
 
         if (tag == DT_STRTAB) {
             // already converted to vaddr by loader
@@ -123,18 +146,27 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
         }
     }
     if (!strtab || !symtab || !strsz || !syment) {
-        DPRINTF("unknown format %x %x %x %x\n", strtab, symtab, strsz, syment);
+        DPRINTF("unknown format %llx %llx %llx %llx\n",
+            strtab, symtab, strsz, syment);
         return true;
     }
     // read symbol table
-    DPRINTF("symbol table entries from 0x%x to 0x%x\n", symtab, strtab);
-    uint32_t s;
+    DPRINTF("symbol table entries from 0x%llx to 0x%llx\n",
+        symtab, strtab);
+    uint64_t s;
     for (s = symtab ; s < strtab ; s += syment) {
-        uint32_t name, value;
+        uint32_t name;
+        uint64_t value;
         uint8_t info;
-        LOAD(name, s + offsetof(elf_sym, st_name));
-        LOAD(value, s + offsetof(elf_sym, st_value));
-        LOAD(info, s + offsetof(elf_sym, st_info));
+        if (is64) {
+            LOAD(name, s + offsetof(Elf64_Sym, st_name));
+            LOAD(value, s + offsetof(Elf64_Sym, st_value));
+            LOAD(info, s + offsetof(Elf64_Sym, st_info));
+        } else {
+            LOAD(name, s + offsetof(Elf32_Sym, st_name));
+            LOAD32(value, s + offsetof(Elf32_Sym, st_value));
+            LOAD(info, s + offsetof(Elf32_Sym, st_info));
+        }
         if (ELF_ST_TYPE(info) == STT_FUNC) {
             // found a function
             address_t addr = value;
@@ -151,7 +183,7 @@ bool parse_header_elf(cpu_t cpu, Mapping *m)
             }
             str[k] = 0;
 
-            DPRINTF("Function: %x:%s\n", (int)addr + image_base, str);
+            DPRINTF("Function: %llx:%s\n", addr + image_base, str);
             char *fullname = g_strjoin(":", m->filename, str, NULL);
             function_add(vmi_get_context(cpu), addr + image_base, fullname);
             g_free(fullname);
