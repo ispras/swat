@@ -2,7 +2,7 @@
 #include "syscalls.h"
 #include "plugins.h"
 #include "regnum.h"
-#include "syscalls-windows.h"
+#include "syscall-functions.h"
 
 #define DEBUG
 #ifdef DEBUG
@@ -11,11 +11,22 @@
 static inline void DPRINTF(const char *fmt, ...) {}
 #endif
 
-static const uint32_t win10x64_syscall_map[] = {
 #define S(name, id) [id] = SYS_##name,
+
+static const uint32_t win10x64_syscall_map[] = {
 #include "syscall-table-win10x64.h"
-#undef S
 };
+
+static const uint32_t linux_x86_64_syscall_map[] = {
+#include "syscall-table-linux-x86_64.h"
+};
+
+#undef S
+
+#define GET_SYSCALL(map, id)                                           \
+    (((id) < sizeof(map##_syscall_map) / sizeof(map##_syscall_map[0])) \
+        ? map##_syscall_map[id]                                        \
+        : SYS_Unknown)
 
 bool is_syscall_x86_64(address_t pc, cpu_t cpu)
 {
@@ -60,17 +71,16 @@ void syscall_x86_64(address_t pc, cpu_t cpu)
         DPRINTF("%llx: syscall %x\n", ctx, id);
         void *params = NULL;
         if (os_type == OS_WIN10x64) {
-            if (id < sizeof(win10x64_syscall_map) / sizeof(win10x64_syscall_map[0])) {
-                id = win10x64_syscall_map[id];
-            } else {
-                id = SYS_Unknown;
-            }
+            id = GET_SYSCALL(win10x64, id);
             if (id != SYS_Unknown) {
                 params = syscall_enter_win64(id, pc, cpu);
             }
-        }/* else if (os_type == OS_LINUX) {
-            params = syscall_enter_linux(reg, pc, cpu);
-        }*/
+        } else if (os_type == OS_LINUX) {
+            id = GET_SYSCALL(linux_x86_64, id);
+            if (id != SYS_Unknown) {
+                params = syscall_enter_linux64(id, pc, cpu);
+            }
+        }
         if (params) {
             sc_insert(ctx, vmi_get_stack_pointer(cpu), id, params);
         }
@@ -82,9 +92,9 @@ void syscall_x86_64(address_t pc, cpu_t cpu)
             //DPRINTF("%llx: sysret %x\n", vmi_get_context(cpu), sc->num);
             if (os_type == OS_WIN10x64) {
                 syscall_exit_win64(sc, pc, cpu);
-            }/* else if (os_type == OS_LINUX) {
-                syscall_exit_linux(sc, pc, cpu);
-            }*/
+            } else if (os_type == OS_LINUX) {
+                syscall_exit_linux64(sc, pc, cpu);
+            }
             sc_erase(ctx, sp);
         }
     }

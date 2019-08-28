@@ -1,9 +1,10 @@
-#ifndef SYSCALLS_WINDOWS_H
-#define SYSCALLS_WINDOWS_H
+#ifndef SYSCALL_FUNCTIONS_H
+#define SYSCALL_FUNCTIONS_H
 
-enum {
-    SYS_Unknown = 0,
-    SYS_NtClose,
+#define SYS_Unknown 0
+
+enum SYS_Windows {
+    SYS_NtClose = 1,
     SYS_NtCreateFile,
     SYS_NtCreateProcess,
     SYS_NtCreateProcessEx,
@@ -16,4 +17,12 @@ enum {
     SYS_NtUnmapViewOfSection,
 };
 
-#endif // SYSCALLS_WINDOWS_H
+enum SYS_Linux {
+    SYS_open = 1,
+    SYS_close,
+    SYS_creat,
+    SYS_mmap,
+    SYS_openat,
+};
+
+#endif // SYSCALLS_FUNCTIONS_H

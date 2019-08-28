@@ -2,7 +2,7 @@
 #include "syscalls.h"
 #include "plugins.h"
 #include "regnum.h"
-#include "syscalls-windows.h"
+#include "syscall-functions.h"
 
 #define DEBUG
 #ifdef DEBUG

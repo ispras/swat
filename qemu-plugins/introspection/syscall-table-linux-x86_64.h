@@ -1,0 +1,5 @@
+S(open, 2)
+S(close, 3)
+S(creat, 85)
+S(mmap, 9)
+S(openat, 257)

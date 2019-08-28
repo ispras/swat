@@ -73,4 +73,8 @@ void syscall_exit_win64(SCData *sc, address_t pc, cpu_t cpu);
 void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu);
 void syscall_exit_linux(SCData *sc, address_t pc, cpu_t cpu);
 
+/* Linux on 64-bit systems */
+void *syscall_enter_linux64(uint32_t sc, address_t pc, cpu_t cpu);
+void syscall_exit_linux64(SCData *sc, address_t pc, cpu_t cpu);
+
 #endif // SYSCALLS_H
