@@ -10,6 +10,8 @@ typedef enum ArchType {
     ARCH_UNKNOWN = 0,
     ARCH_I386,
     ARCH_X86_64,
+    ARCH_ARM,
+    ARCH_AARCH64,
 } ArchType;
 
 typedef void * cpu_t;

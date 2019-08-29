@@ -11,16 +11,30 @@
 static inline void DPRINTF(const char *fmt, ...) {}
 #endif
 
+static const int x86_64_args[6] = {
+    AMD64_RDI_REGNUM, AMD64_RSI_REGNUM, AMD64_RDX_REGNUM,
+    AMD64_R10_REGNUM, AMD64_R8_REGNUM, AMD64_R9_REGNUM,
+};
+
+static const int aarch64_args[6] = {
+    AARCH64_X0_REGNUM, AARCH64_X0_REGNUM + 1, AARCH64_X0_REGNUM + 2,
+    AARCH64_X0_REGNUM + 3, AARCH64_X0_REGNUM + 4, AARCH64_X0_REGNUM + 5,
+};
+
 void *syscall_enter_linux64(uint32_t sc, address_t pc, cpu_t cpu)
 {
     void *params = NULL;
     context_t ctx = vmi_get_context(cpu);
-    uint64_t arg1 = vmi_get_register(cpu, AMD64_RDI_REGNUM);
-    uint64_t arg2 = vmi_get_register(cpu, AMD64_RSI_REGNUM);
-    uint64_t arg3 = vmi_get_register(cpu, AMD64_RDX_REGNUM);
-    uint64_t arg4 = vmi_get_register(cpu, AMD64_R10_REGNUM);
-    uint64_t arg5 = vmi_get_register(cpu, AMD64_R8_REGNUM);
-    uint64_t arg6 = vmi_get_register(cpu, AMD64_R9_REGNUM);
+    const int *a = x86_64_args;
+    if (vmi_get_arch_type() == ARCH_AARCH64) {
+        a = aarch64_args;
+    }
+    uint64_t arg1 = vmi_get_register(cpu, a[0]);
+    uint64_t arg2 = vmi_get_register(cpu, a[1]);
+    uint64_t arg3 = vmi_get_register(cpu, a[2]);
+    uint64_t arg4 = vmi_get_register(cpu, a[3]);
+    uint64_t arg5 = vmi_get_register(cpu, a[4]);
+    uint64_t arg6 = vmi_get_register(cpu, a[5]);
     switch (sc)
     {
     case SYS_open:
@@ -77,7 +91,10 @@ void *syscall_enter_linux64(uint32_t sc, address_t pc, cpu_t cpu)
 
 void syscall_exit_linux64(SCData *sc, address_t pc, cpu_t cpu)
 {
-    uint64_t retval = vmi_get_register(cpu, AMD64_RAX_REGNUM);
+    uint64_t retval = vmi_get_register(cpu,
+        vmi_get_arch_type() == ARCH_AARCH64
+            ? AARCH64_X0_REGNUM
+            : AMD64_RAX_REGNUM);
     context_t ctx = vmi_get_context(cpu);
     switch (sc->num)
     {

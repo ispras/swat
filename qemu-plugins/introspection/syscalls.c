@@ -66,14 +66,35 @@ void syscall_deinit_process(Process *p)
 
 bool syscall_needs_before_insn(address_t pc, cpu_t cpu)
 {
-    return is_syscall_i386(pc, cpu) || is_syscall_x86_64(pc, cpu);
+    switch (vmi_get_arch_type())
+    {
+    case ARCH_I386:
+        return is_syscall_i386(pc, cpu);
+    case ARCH_X86_64:
+        return is_syscall_x86_64(pc, cpu);
+    case ARCH_ARM:
+    //    return is_syscall_arm(pc, cpu);
+    case ARCH_AARCH64:
+        return is_syscall_aarch64(pc, cpu);
+    }
+    return false;
 }
 
 void syscall_before_insn(address_t pc, cpu_t cpu)
 {
-    if (is_syscall_i386(pc, cpu)) {
+    switch (vmi_get_arch_type())
+    {
+    case ARCH_I386:
         syscall_i386(pc, cpu);
-    } else {
+        break;
+    case ARCH_X86_64:
         syscall_x86_64(pc, cpu);
+        break;
+    case ARCH_ARM:
+    //    syscall_arm(pc, cpu);
+        break;
+    case ARCH_AARCH64:
+        syscall_aarch64(pc, cpu);
+        break;
     }
 }

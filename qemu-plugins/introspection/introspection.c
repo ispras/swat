@@ -12,6 +12,10 @@ bool plugin_init(const char *args)
         arch_type = ARCH_I386;
     } else if (!strcmp(arch, "x86_64")) {
         arch_type = ARCH_X86_64;
+    } else if (!strcmp(arch, "arm")) {
+        arch_type = ARCH_ARM;
+    } else if (!strcmp(arch, "aarch64")) {
+        arch_type = ARCH_AARCH64;
     } else {
         return false;
     }

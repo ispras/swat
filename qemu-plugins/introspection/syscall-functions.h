@@ -19,10 +19,11 @@ enum SYS_Windows {
 
 enum SYS_Linux {
     SYS_open = 1,
+    SYS_openat,
     SYS_close,
     SYS_creat,
     SYS_mmap,
-    SYS_openat,
+    SYS_mmap2,
 };
 
 #endif // SYSCALLS_FUNCTIONS_H

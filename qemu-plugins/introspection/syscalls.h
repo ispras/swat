@@ -61,6 +61,14 @@ void syscall_i386(address_t pc, cpu_t cpu);
 bool is_syscall_x86_64(address_t pc, cpu_t cpu);
 void syscall_x86_64(address_t pc, cpu_t cpu);
 
+/* Functions for detecting and processing arm syscalls */
+bool is_syscall_arm(address_t pc, cpu_t cpu);
+void syscall_arm(address_t pc, cpu_t cpu);
+
+/* Functions for detecting and processing aarch64 syscalls */
+bool is_syscall_aarch64(address_t pc, cpu_t cpu);
+void syscall_aarch64(address_t pc, cpu_t cpu);
+
 /* WinXP on i386 */
 void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu);
 void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu);
