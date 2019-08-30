@@ -11,14 +11,12 @@
 static inline void DPRINTF(const char *fmt, ...) {}
 #endif
 
-#define S(name, id) [id] = SYS_##name,
-
 static const uint32_t linux_syscall_map[] = {
-    [5] = SYS_open,
-    [6] = SYS_close,
-    [8] = SYS_creat,
-    [192] = SYS_mmap2,
-    [322] = SYS_openat,
+    [1024] = SYS_open,
+    [57] = SYS_close,
+    [1064] = SYS_creat,
+    [222] = SYS_mmap,
+    [56] = SYS_openat,
 };
 
 #undef S
