@@ -63,7 +63,7 @@ void syscall_aarch64(address_t pc, cpu_t cpu)
     if (code == 0x01) {
         /* svc */
         uint32_t id = vmi_get_register(cpu, AARCH64_X0_REGNUM + 8);
-        DPRINTF("%llx: syscall %x\n", ctx, id);
+        DPRINTF("%llx: syscall %d\n", ctx, id);
         void *params = NULL;
         id = GET_SYSCALL(linux, id);
         if (id != SYS_Unknown) {
