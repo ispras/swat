@@ -2,8 +2,15 @@
 
 SWAT can trace all API calls within the system.
 
-It currently supports Windows XP/32, Windows 10/64, Linux/32 (all possible versions), and Linux/64 (all possible versions).
-
+It currently supports the following platforms:
+ * i386
+   * Windows XP
+ * x86_64
+   * Windows 10
+   * Linux (all versions)
+ * AArch64
+   * Linux (all versions)
+ 
 Running API tracing:
 
     # SWAT installation directory
