@@ -33,8 +33,6 @@ static const uint32_t linux_x86_64_syscall_map[] = {
     [257] = SYS_openat,
 };
 
-#undef S
-
 #define GET_SYSCALL(map, id)                                           \
     (((id) < sizeof(map##_syscall_map) / sizeof(map##_syscall_map[0])) \
         ? map##_syscall_map[id]                                        \
