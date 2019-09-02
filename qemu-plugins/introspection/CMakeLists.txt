@@ -8,7 +8,7 @@ add_library(introspection SHARED introspection.c
             module.c module-elf.c module-pe.c
             process.c section.c syscalls.c syscall-arm.c
             syscall-aarch64.c syscall-i386.c
-            syscall-linux.c syscall-linux64.c syscall-win32.c
+            syscall-linux32.c syscall-linux64.c syscall-win32.c
             syscall-win64.c syscall-x86_64.c)
 
 target_include_directories(introspection PRIVATE ../../qemu/plugins/include)

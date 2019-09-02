@@ -77,9 +77,9 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu);
 void *syscall_enter_win64(uint32_t sc, address_t pc, cpu_t cpu);
 void syscall_exit_win64(SCData *sc, address_t pc, cpu_t cpu);
 
-/* Linux on i386 (TODO: and others) */
-void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu);
-void syscall_exit_linux(SCData *sc, address_t pc, cpu_t cpu);
+/* Linux on 32-bit systems */
+void *syscall_enter_linux32(uint32_t sc, address_t pc, cpu_t cpu);
+void syscall_exit_linux32(SCData *sc, address_t pc, cpu_t cpu);
 
 /* Linux on 64-bit systems */
 void *syscall_enter_linux64(uint32_t sc, address_t pc, cpu_t cpu);

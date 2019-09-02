@@ -2,6 +2,7 @@
 #include "syscalls.h"
 #include "plugins.h"
 #include "regnum.h"
+#include "syscall-functions.h"
 
 #define DEBUG
 #ifdef DEBUG
@@ -31,48 +32,56 @@ static inline void DPRINTF(const char *fmt, ...) {}
 #define SOCKETCALL_RECVMMSG    19
 #define SOCKETCALL_SENDMMSG    20
 
+static const int i386_args[6] = {
+    I386_EBX_REGNUM, I386_ECX_REGNUM, I386_EDX_REGNUM,
+    I386_ESI_REGNUM, I386_EDI_REGNUM, I386_EBP_REGNUM,
+};
 
-void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu)
+static const int arm_args[6] = {
+    ARM_A1_REGNUM, ARM_A1_REGNUM + 1, ARM_A1_REGNUM + 2,
+    ARM_A1_REGNUM + 3, ARM_A1_REGNUM + 4, ARM_A1_REGNUM + 5,
+};
+
+void *syscall_enter_linux32(uint32_t sc, address_t pc, cpu_t cpu)
 {
     void *params = NULL;
     context_t ctx = vmi_get_context(cpu);
-    uint32_t param1 = vmi_get_register(cpu, I386_EBX_REGNUM);
-    uint32_t param2 = vmi_get_register(cpu, I386_ECX_REGNUM);
-    uint32_t param3 = vmi_get_register(cpu, I386_EDX_REGNUM);
-    uint32_t param4 = vmi_get_register(cpu, I386_ESI_REGNUM);
-    uint32_t param5 = vmi_get_register(cpu, I386_EDI_REGNUM);
-    uint32_t param6 = vmi_get_register(cpu, I386_EBP_REGNUM);
+    const int *a = i386_args;
+    if (vmi_get_arch_type() == ARCH_ARM) {
+        a = arm_args;
+    }
+    uint32_t arg1 = vmi_get_register(cpu, a[0]);
+    uint32_t arg2 = vmi_get_register(cpu, a[1]);
+    uint32_t arg3 = vmi_get_register(cpu, a[2]);
+    uint32_t arg4 = vmi_get_register(cpu, a[3]);
+    uint32_t arg5 = vmi_get_register(cpu, a[4]);
+    uint32_t arg6 = vmi_get_register(cpu, a[5]);
     switch (sc)
     {
-    case 5: // sys_open
+    case SYS_open:
     {
-        char *filename = vmi_strdup(cpu, param1, 0);
+        char *filename = vmi_strdup(cpu, arg1, 0);
         FileParams *p = g_new0(FileParams, 1);
         p->name = filename;
         DPRINTF("%llx: trying to open file: %s\n", ctx, filename);
         return p;
     }
-    case 6: // sys_close
+    case SYS_close:
     {
         handle_t *h = g_new(handle_t, 1);
-        *h = param1;
+        *h = arg1;
         DPRINTF("%llx: trying to close handle: %x\n", ctx, (int)*h);
         return h;
     }
-    case 8: // sys_create
+    case SYS_creat:
     {
-        char *filename = vmi_strdup(cpu, param1, 0);
+        char *filename = vmi_strdup(cpu, arg1, 0);
         FileParams *p = g_new0(FileParams, 1);
         p->name = filename;
         DPRINTF("%llx: trying to create file: %s\n", ctx, filename);
         return p;
     }
-    case 90: // sys_mmap
-    {
-        DPRINTF("%llx: TODO: trying to mmap\n", ctx);
-        return NULL;
-    }
-    case 102: // sys_socketcall
+    /*case 102: // sys_socketcall
     {
         switch (param1)
         {
@@ -98,16 +107,17 @@ void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu)
                 break;
         }
         return NULL;
-    }
-    case 192: // sys_mmap2
+    }*/
+    case SYS_mmap: // TODO?
+    case SYS_mmap2:
     {
-        File *file = file_find(ctx, param5);
+        File *file = file_find(ctx, arg5);
         if (file) {
             MapFileParams *p = g_new0(MapFileParams, 1);
             p->file = file;
-            p->base = param1;
-            p->size = param2;
-            p->offset = param6; // in pages
+            p->base = arg1;
+            p->size = arg2;
+            p->offset = arg6; // in pages
             DPRINTF("%llx: trying to mmap2 %s\n", ctx, file->filename);
             return p;
         } else {
@@ -115,9 +125,9 @@ void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu)
         }
         return NULL;
     }
-    case 295: // sys_openat
+    case SYS_openat:
     {
-        char *filename = vmi_strdup(cpu, param2, 0);
+        char *filename = vmi_strdup(cpu, arg2, 0);
         FileParams *p = g_new0(FileParams, 1);
         p->name = filename;
         DPRINTF("%llx: trying to openat file: %s\n", ctx, filename);
@@ -127,15 +137,18 @@ void *syscall_enter_linux(uint32_t sc, address_t pc, cpu_t cpu)
     return params;
 }
 
-void syscall_exit_linux(SCData *sc, address_t pc, cpu_t cpu)
+void syscall_exit_linux32(SCData *sc, address_t pc, cpu_t cpu)
 {
-    uint32_t retval = vmi_get_register(cpu, I386_EAX_REGNUM);
+    uint32_t retval = vmi_get_register(cpu,
+        vmi_get_arch_type() == ARCH_I386
+            ? I386_EAX_REGNUM
+            : ARM_A1_REGNUM);
     context_t ctx = vmi_get_context(cpu);
     switch (sc->num)
     {
-    case 5: // sys_open
-    case 8: // sys_create
-    case 295: // sys_openat
+    case SYS_open:
+    case SYS_creat:
+    case SYS_openat:
     {
         FileParams *p = sc->params;
         if ((int32_t)retval >= 0) {
@@ -149,7 +162,7 @@ void syscall_exit_linux(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 6: // sys_close
+    case SYS_close:
         if (!retval) {
             handle_t *h = sc->params;
             DPRINTF("%llx: close handle: %x\n", ctx, (int)*h);
@@ -158,7 +171,7 @@ void syscall_exit_linux(SCData *sc, address_t pc, cpu_t cpu)
             DPRINTF("%llx: failed close handle\n", ctx);
         }
         break;
-    case 192: // sys_mmap2
+    case SYS_mmap:
     {
         MapFileParams *p = sc->params;
         if (retval != -1UL) {

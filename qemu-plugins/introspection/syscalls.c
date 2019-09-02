@@ -73,7 +73,7 @@ bool syscall_needs_before_insn(address_t pc, cpu_t cpu)
     case ARCH_X86_64:
         return is_syscall_x86_64(pc, cpu);
     case ARCH_ARM:
-    //    return is_syscall_arm(pc, cpu);
+        return is_syscall_arm(pc, cpu);
     case ARCH_AARCH64:
         return is_syscall_aarch64(pc, cpu);
     }
@@ -91,7 +91,7 @@ void syscall_before_insn(address_t pc, cpu_t cpu)
         syscall_x86_64(pc, cpu);
         break;
     case ARCH_ARM:
-    //    syscall_arm(pc, cpu);
+        syscall_arm(pc, cpu);
         break;
     case ARCH_AARCH64:
         syscall_aarch64(pc, cpu);

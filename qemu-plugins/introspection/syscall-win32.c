@@ -2,6 +2,7 @@
 #include "syscalls.h"
 #include "plugins.h"
 #include "regnum.h"
+#include "syscall-functions.h"
 
 #define DEBUG
 #ifdef DEBUG
@@ -19,14 +20,14 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
     context_t ctx = vmi_get_context(cpu);
     switch (sc)
     {
-    case 0x19: // NtClose
+    case SYS_NtClose:
     {
         // IN HANDLE Handle
         handle_t *h = g_new(handle_t, 1);
         *h = vmi_read_dword(cpu, data);
         return h;
     }
-    case 0x25: // NtCreateFile
+    case SYS_NtCreateFile:
     {
         // OUT PHANDLE           FileHandle,
         // IN ACCESS_MASK        DesiredAccess,
@@ -50,7 +51,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         p->name = str;
         return p;
     }
-    case 0x2f: // NtCreateProcess
+    case SYS_NtCreateProcess:
         // OUT PHANDLE           ProcessHandle,
         // IN ACCESS_MASK        DesiredAccess,
         // IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
@@ -60,7 +61,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         // IN HANDLE             DebugPort OPTIONAL,
         // IN HANDLE             ExceptionPort OPTIONAL );
         /* Fallthrough */
-    case 0x30: // NtCreateProcessEx
+    case SYS_NtCreateProcessEx:
     {
         // OUT PHANDLE ProcessHandle,
         // IN ACCESS_MASK DesiredAccess,
@@ -73,7 +74,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         // IN BOOLEAN InJob)
         break;
     }
-    case 0x32: // NtCreateSection
+    case SYS_NtCreateSection:
     {
         // PHANDLE            SectionHandle,
         // ACCESS_MASK        DesiredAccess,
@@ -103,7 +104,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         break;
     }
     // TODO: NtCreateSectionEx
-    case 0x7d: // NtOpenSection
+    case SYS_NtOpenSection:
     {
         // PHANDLE            SectionHandle,
         // ACCESS_MASK        DesiredAccess,
@@ -120,7 +121,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         g_free(str);
         return p;
     }
-    case 0x6c: // NtMapViewOfSection
+    case SYS_NtMapViewOfSection:
     {
         // HANDLE          SectionHandle,
         // HANDLE          ProcessHandle,
@@ -152,7 +153,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x44: // NtDuplicateObject
+    case SYS_NtDuplicateObject:
     {
         // TODO: can't identify the process by handle
         uint32_t p1, p2;
@@ -185,7 +186,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         // IN ULONG                Options );
         break;
     }
-    case 0x74: // NtOpenFile
+    case SYS_NtOpenFile:
     {
         // OUT PHANDLE           FileHandle,
         // IN ACCESS_MASK        DesiredAccess,
@@ -214,7 +215,7 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         p->name = str;
         return p;
     }
-    case 0x9a: // NtQueryInformationProcess
+    case SYS_NtQueryInformationProcess:
     {
         // IN HANDLE           ProcessHandle,
         // IN PROCESSINFOCLASS ProcessInformationClass,
@@ -233,9 +234,9 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0xb7: // NtReadFile
-        break;
-    case 0x10b: // NtUnmapViewOfSection
+    //case SYS_NtReadFile:
+    //    break;
+    case SYS_NtUnmapViewOfSection:
     {
         // HANDLE ProcessHandle,
         // PVOID  BaseAddress
@@ -250,8 +251,8 @@ void *syscall_enter_winxp(uint32_t sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x112: // NtWriteFile
-        break;
+    //case SYS_NtWriteFile:
+    //    break;
     }
     return params;
 }
@@ -262,7 +263,7 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
     context_t ctx = vmi_get_context(cpu);
     switch (sc->num)
     {
-    case 0x19: // NtClose
+    case SYS_NtClose:
     {
         if (!retval) {
             handle_t *h = sc->params;
@@ -272,7 +273,7 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x32: // NtCreateSection
+    case SYS_NtCreateSection:
     {
         SectionParams *p = sc->params;
         if (!retval) {
@@ -285,7 +286,7 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x44: // NtDuplicateObject
+    case SYS_NtDuplicateObject:
     {
         DuplicateParams *p = sc->params;
         if (!retval) {
@@ -296,7 +297,7 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x6c: // NtMapViewOfSection
+    case SYS_NtMapViewOfSection:
     {
         MapSectionParams *p = sc->params;
         if (!retval) {
@@ -308,10 +309,10 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x25: // NtCreateFile
+    case SYS_NtCreateFile:
         DPRINTF("create\n");
         /* Fallthrough */
-    case 0x74: // NtOpenFile
+    case SYS_NtOpenFile:
     {
         FileParams *p = sc->params;
         if (!retval) {
@@ -324,7 +325,7 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x7d: // NtOpenSection
+    case SYS_NtOpenSection:
     {
         SectionParams *p = sc->params;
         if (!retval) {
@@ -342,7 +343,7 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
         }
         break;
     }
-    case 0x9a: // NtQueryInformationProcess
+    case SYS_NtQueryInformationProcess:
     {
         /* Current process only */
         address_t *addr = sc->params;
@@ -352,17 +353,13 @@ void syscall_exit_winxp(SCData *sc, address_t pc, cpu_t cpu)
             p->pid = pid;
         }
     }
-    case 0xb7:
-        break;
-    case 0x10b: // NtUnmapViewOfSection
+    case SYS_NtUnmapViewOfSection:
         if (!retval) {
             address_t *base = sc->params;
             DPRINTF("%08x: unmapping section base=%x\n",
                 (int)ctx, (int)*base);
             mapping_delete(ctx, *base);
         }
-        break;
-    case 0x112:
         break;
     }
     g_free(sc->params);
