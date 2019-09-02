@@ -11,14 +11,26 @@
 static inline void DPRINTF(const char *fmt, ...) {}
 #endif
 
-#define S(name, id) [id] = SYS_##name,
-
 static const uint32_t win10x64_syscall_map[] = {
-#include "syscall-table-win10x64.h"
+    [0xf] = SYS_NtClose,
+    [0x55] = SYS_NtCreateFile,
+    [0xad] = SYS_NtCreateProcess,
+    [0x4d] = SYS_NtCreateProcessEx,
+    [0x4a] = SYS_NtCreateSection,
+    [0x37] = SYS_NtOpenSection,
+    [0x28] = SYS_NtMapViewOfSection,
+    [0x3c] = SYS_NtDuplicateObject,
+    [0x33] = SYS_NtOpenFile,
+    [0x19] = SYS_NtQueryInformationProcess,
+    [0x2a] = SYS_NtUnmapViewOfSection,
 };
 
 static const uint32_t linux_x86_64_syscall_map[] = {
-#include "syscall-table-linux-x86_64.h"
+    [2] = SYS_open,
+    [3] = SYS_close,
+    [85] = SYS_creat,
+    [9] = SYS_mmap,
+    [257] = SYS_openat,
 };
 
 #undef S
