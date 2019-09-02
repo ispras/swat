@@ -6,6 +6,8 @@ It currently supports the following platforms:
  * i386
    * Windows XP
    * Linux (all versions)
+ * ARM
+   * Linux (all versions)
  * x86_64
    * Windows 10
    * Linux (all versions)
