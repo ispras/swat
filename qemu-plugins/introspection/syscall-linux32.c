@@ -133,6 +133,13 @@ void *syscall_enter_linux32(uint32_t sc, address_t pc, cpu_t cpu)
         DPRINTF("%llx: trying to openat file: %s\n", ctx, filename);
         return p;
     }
+    case SYS_execve:
+    {
+        char *filename = vmi_strdup(cpu, arg1, 0);
+        DPRINTF("%llx: execve: %s\n", ctx, filename);
+        g_free(filename);
+        return NULL;
+    }
     }
     return params;
 }

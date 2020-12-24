@@ -24,6 +24,7 @@ enum SYS_Linux {
     SYS_creat,
     SYS_mmap,
     SYS_mmap2,
+    SYS_execve,
 };
 
 #endif // SYSCALLS_FUNCTIONS_H

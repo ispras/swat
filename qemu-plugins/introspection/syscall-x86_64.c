@@ -31,6 +31,7 @@ static const uint32_t linux_x86_64_syscall_map[] = {
     [85] = SYS_creat,
     [9] = SYS_mmap,
     [257] = SYS_openat,
+    [59] = SYS_execve,
 };
 
 #define GET_SYSCALL(map, id)                                           \

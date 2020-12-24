@@ -15,6 +15,7 @@ static const uint32_t linux_syscall_map[] = {
     [5] = SYS_open,
     [6] = SYS_close,
     [8] = SYS_creat,
+    [11] = SYS_execve,
     [192] = SYS_mmap,
     [295] = SYS_openat,
 };
