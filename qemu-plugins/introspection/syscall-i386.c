@@ -11,14 +11,7 @@
 static inline void DPRINTF(const char *fmt, ...) {}
 #endif
 
-static const uint32_t linux_syscall_map[] = {
-    [5] = SYS_open,
-    [6] = SYS_close,
-    [8] = SYS_creat,
-    [11] = SYS_execve,
-    [192] = SYS_mmap,
-    [295] = SYS_openat,
-};
+#include "linux-i386-syscall-map.h"
 
 static const uint32_t winxp_syscall_map[] = {
     [0x19] = SYS_NtClose,
@@ -83,7 +76,7 @@ void syscall_i386(address_t pc, cpu_t cpu)
         /* Check nt_mask */
         if (vmi_get_register(cpu, I386_EFLAGS_REGNUM) & 0x00004000) {
             DPRINTF("TODO: NT mask is on, use another iret algorithm\n");
-        } else {
+        } else {///
             SCData *sc = sc_find(ctx, esp);
             /* get new ESP from the stack - try for sysenter-iret pair */
             if (!sc) {
@@ -105,7 +98,7 @@ void syscall_i386(address_t pc, cpu_t cpu)
         address_t tr = vmi_get_register(cpu, I386_TR_BASE_REGNUM);
         uint32_t esp = vmi_read_dword(cpu, tr + 4) - 20;
         DPRINTF("%llx: int80 %x sp=%x\n", ctx, reg, esp);
-        reg = GET_SYSCALL(linux, reg);
+        reg = GET_SYSCALL(linux_i386, reg);
         if (reg != SYS_Unknown) {
             void *params = syscall_enter_linux32(reg, pc, cpu);
             if (params) {
@@ -127,7 +120,7 @@ void syscall_i386(address_t pc, cpu_t cpu)
                 params = syscall_enter_winxp(reg, pc, cpu);
             }
         } else if (os_type == OS_LINUX) {
-            reg = GET_SYSCALL(linux, reg);
+            reg = GET_SYSCALL(linux_i386, reg);
             if (reg != SYS_Unknown) {
                 params = syscall_enter_linux32(reg, pc, cpu);
             }

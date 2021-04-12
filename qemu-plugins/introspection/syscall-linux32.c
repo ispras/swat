@@ -37,6 +37,11 @@ static const int i386_args[6] = {
     I386_ESI_REGNUM, I386_EDI_REGNUM, I386_EBP_REGNUM,
 };
 
+static const int x86_64_args[6] = {
+    AMD64_RBX_REGNUM, AMD64_RCX_REGNUM, AMD64_RDX_REGNUM,
+    AMD64_RSI_REGNUM, AMD64_RDI_REGNUM, AMD64_RBP_REGNUM,
+};
+
 static const int arm_args[6] = {
     ARM_A1_REGNUM, ARM_A1_REGNUM + 1, ARM_A1_REGNUM + 2,
     ARM_A1_REGNUM + 3, ARM_A1_REGNUM + 4, ARM_A1_REGNUM + 5,
@@ -49,6 +54,8 @@ void *syscall_enter_linux32(uint32_t sc, address_t pc, cpu_t cpu)
     const int *a = i386_args;
     if (vmi_get_arch_type() == ARCH_ARM) {
         a = arm_args;
+    } else if (vmi_get_arch_type() == ARCH_X86_64) {
+        a = x86_64_args;
     }
     uint32_t arg1 = vmi_get_register(cpu, a[0]);
     uint32_t arg2 = vmi_get_register(cpu, a[1]);
