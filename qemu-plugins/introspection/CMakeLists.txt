@@ -11,7 +11,7 @@ add_library(introspection SHARED introspection.c
             syscall-linux32.c syscall-linux64.c syscall-win32.c
             syscall-win64.c syscall-x86_64.c)
 
-target_include_directories(introspection PRIVATE ../../qemu/plugins/include)
+target_include_directories(introspection PRIVATE ../../qemu/plugins_swat/include)
 target_include_directories(introspection PRIVATE ${GLIB_INCLUDE_DIRS})
 target_link_libraries(introspection INTERFACE ${GLIB_LDFLAGS})
 
